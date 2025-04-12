@@ -1,0 +1,2 @@
+Attendance_Id,User_Id,Name,Department,Shift_Name,Shift_Start,Lunch_Start,Lunch_End,Checkout,Checkin,Shift_End,Late_Arrival,Early_Departure,Status,Working_Hours,Overtime_Hours,Break_Hours,Effective_Working_Hours,DTS,IsBilled,IsPaid,WorkingFor,Location,QRCodeValue,IsArchived,TotalHours
+22,50,priya,,,,,,,08/06/2024 18:37:51,,,,In,,,,,01/01/0001 00:00:00,False,False,,,a8642f5e-31e8-4d7d-aeb2-553a6c248072,False,
