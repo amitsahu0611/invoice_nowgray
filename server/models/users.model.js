@@ -2,7 +2,6 @@
 
 const {DataTypes} = require("sequelize");
 const sequelize = require("../connection/db_connection");
-const Lookups = require("./lookups.model");
 
 const Users = sequelize.define(
   "user",
