@@ -1,8 +1,13 @@
 /** @format */
 
 import React, {useState} from "react";
+import {showError} from "../../utils/config";
+import {createCompany} from "../redux/slice/company.slice";
+import {useDispatch} from "react-redux";
 
 const CreateCompany = ({onSubmit}) => {
+  const dispatch = useDispatch();
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -10,7 +15,6 @@ const CreateCompany = ({onSubmit}) => {
     bgColor: "#FFFFFF", // Default background color
     phone: "",
     address: "",
-    description: "",
     gst: "",
     website: "",
     status: "active",
@@ -20,21 +24,14 @@ const CreateCompany = ({onSubmit}) => {
     setForm((prev) => ({...prev, [field]: value}));
   };
 
-  const toggleStatus = () => {
-    setForm((prev) => ({
-      ...prev,
-      status: prev.status === "active" ? "inactive" : "active",
-    }));
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const {name, email, phone, address, description, gst, website} = form;
-    if (name && email && phone && address && description && gst && website) {
-      console.log("Form Submitted: ", form);
-      if (onSubmit) onSubmit(form);
+    const {name, email, phone, address, website} = form;
+    console.log("form", form);
+    if (name && email && phone && address && website) {
+      await dispatch(createCompany(form));
     } else {
-      alert("Please fill all the fields.");
+      showError("Please fill all the fields.");
     }
   };
 
@@ -99,20 +96,6 @@ const CreateCompany = ({onSubmit}) => {
             placeholder='Company Address'
             value={form.address}
             onChange={(e) => handleChange("address", e.target.value)}
-            required
-            className='border border-gray-300 rounded-md px-3 py-2'
-          />
-        </div>
-
-        {/* Company Description */}
-        <div className='flex flex-col'>
-          <label className='mb-1 text-sm font-medium text-gray-700'>
-            Description
-          </label>
-          <textarea
-            placeholder='Company Description'
-            value={form.description}
-            onChange={(e) => handleChange("description", e.target.value)}
             required
             className='border border-gray-300 rounded-md px-3 py-2'
           />

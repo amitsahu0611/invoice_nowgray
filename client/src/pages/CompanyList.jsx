@@ -1,53 +1,17 @@
 /** @format */
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Download, Search, Pencil} from "lucide-react";
+import {useDispatch, useSelector} from "react-redux";
+import {getAllCompany} from "../redux/slice/company.slice";
 
 const TABLE_HEAD = [
+  "Sr. No.",
   "Company Name",
-  "Email",
-  "Phone",
+  "Company Email",
+  "Company Phone",
   "Status",
-  "Currency",
   "Actions",
-];
-
-const TABLE_ROWS = [
-  {
-    name: "Spotify",
-    email: "contact@spotify.com",
-    phone: "+1 234 567 890",
-    status: "active",
-    currency: "USD",
-  },
-  {
-    name: "Amazon",
-    email: "contact@amazon.com",
-    phone: "+1 234 567 891",
-    status: "active",
-    currency: "USD",
-  },
-  {
-    name: "Pinterest",
-    email: "contact@pinterest.com",
-    phone: "+1 234 567 892",
-    status: "inactive",
-    currency: "USD",
-  },
-  {
-    name: "Google",
-    email: "contact@google.com",
-    phone: "+1 234 567 893",
-    status: "active",
-    currency: "USD",
-  },
-  {
-    name: "Netflix",
-    email: "contact@netflix.com",
-    phone: "+1 234 567 894",
-    status: "inactive",
-    currency: "USD",
-  },
 ];
 
 const getStatusColor = (status) => {
@@ -62,16 +26,32 @@ const getStatusColor = (status) => {
 };
 
 export default function CompanyList() {
+  const dispatch = useDispatch();
+
   const [searchQuery, setSearchQuery] = useState("");
+  const [allCompanies, setAllCompanies] = useState([]);
+
+  const companies = useSelector((state) => state.company.allCompanies);
+  console.log("allCompanies", allCompanies);
+
+  useEffect(() => {
+    dispatch(getAllCompany());
+  }, []);
+
+  useEffect(() => {
+    if (companies?.length > 0) {
+      setAllCompanies(companies);
+    }
+  }, [companies]);
 
   // Filter the rows based on the search query
-  const filteredRows = TABLE_ROWS.filter(
+  const filteredRows = allCompanies?.filter(
     (row) =>
-      row.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.phone.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.currency.toLowerCase().includes(searchQuery.toLowerCase())
+      row.company_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row.company_phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row.status?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row.website?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -112,13 +92,14 @@ export default function CompanyList() {
         </thead>
 
         <tbody>
-          {filteredRows.map((row, index) => {
-            const {name, email, phone, status, currency} = row;
+          {filteredRows?.map((row, index) => {
+            const {company_email, company_name, company_phone, status} = row;
             return (
               <tr key={index} className='border-b'>
-                <td className='p-4 text-sm'>{name}</td>
-                <td className='p-4 text-sm'>{email}</td>
-                <td className='p-4 text-sm'>{phone}</td>
+                <td className='p-4 text-sm'>{index + 1}</td>
+                <td className='p-4 text-sm'>{company_name}</td>
+                <td className='p-4 text-sm'>{company_email}</td>
+                <td className='p-4 text-sm'>{company_phone}</td>
                 <td className='p-4 text-sm'>
                   <span
                     className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
@@ -128,7 +109,6 @@ export default function CompanyList() {
                     {status}
                   </span>
                 </td>
-                <td className='p-4 text-sm'>{currency}</td>
                 <td className='p-4 text-sm'>
                   <button className='text-blue-600 hover:text-blue-800'>
                     <Pencil className='h-5 w-5' />

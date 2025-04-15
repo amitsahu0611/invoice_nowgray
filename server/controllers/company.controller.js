@@ -1,94 +1,80 @@
 /** @format */
 
-const CompanyInfos = require("../models/Company.model");
+const Company = require("../models/Company.model");
+const {createSuccess} = require("../utils/response");
 
+// Create Company
 const createCompany = async (req, res) => {
   try {
-    const {company_name, company_email, company_phone, company_address} =
-      req.body;
-
-    const logoPath = req.file ? req.file.path : null;
-
-    const newCompany = await CompanyInfos.create({
-      company_name,
-      company_logo: logoPath,
-      company_email,
-      company_phone,
-      company_address,
+    console.log("req.body", req.body);
+    const company = await Company.create({
+      company_name: req.body.name,
+      company_email: req.body.email,
+      company_phone: req.body.phone,
+      company_address: req.body.address,
+      gst: req.body.gst,
+      website: req.body.website,
+      color: req.body.color,
+      bgColor: req.body.bgColor,
+      status: req.body.status,
     });
 
-    res.status(201).json({
-      success: true,
-      message: "Company created successfully",
-      data: newCompany,
-    });
+    if (company) {
+      res.json(createSuccess("Company created successfully", company));
+    } else {
+      res.json(createError("Error got"));
+    }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({success: false, message: "Server error"});
+    res.status(400).json({error: error.message});
   }
 };
 
+// Get All Companies
 const getAllCompanies = async (req, res) => {
   try {
-    const companies = await CompanyInfos.findAll({
-      where: {is_deleted: false},
-    });
-    res.status(200).json({success: true, data: companies});
+    const companies = await Company.findAll();
+    res.json(companies);
   } catch (error) {
-    res.status(500).json({success: false, message: "Server error"});
+    res.status(500).json({error: error.message});
   }
 };
 
+// Get Company by ID
 const getCompanyById = async (req, res) => {
   try {
-    const company = await CompanyInfos.findByPk(req.params.id);
-    if (!company || company.is_deleted)
-      return res.status(404).json({success: false, message: "Not found"});
-
-    res.status(200).json({success: true, data: company});
+    const {id} = req.params;
+    const company = await Company.findByPk(id);
+    if (!company) {
+      return res.status(404).json({error: "Company not found"});
+    }
+    res.json(company);
   } catch (error) {
-    res.status(500).json({success: false, message: "Server error"});
+    res.status(500).json({error: error.message});
   }
 };
 
+// Update Company
 const updateCompany = async (req, res) => {
   try {
-    const company = await CompanyInfos.findByPk(req.params.id);
-    if (!company || company.is_deleted)
-      return res.status(404).json({success: false, message: "Not found"});
+    const {id} = req.params;
+    const [updated] = await Company.update(req.body, {
+      where: {company_id: id},
+    });
 
-    const updatedData = req.body;
-    if (req.file) {
-      updatedData.company_logo = req.file.path;
+    if (updated === 0) {
+      return res.status(404).json({error: "Company not found or no changes"});
     }
 
-    await company.update(updatedData);
-    res
-      .status(200)
-      .json({success: true, message: "Company updated", data: company});
+    const updatedCompany = await Company.findByPk(id);
+    res.json(updatedCompany);
   } catch (error) {
-    res.status(500).json({success: false, message: "Server error"});
-  }
-};
-
-const deleteCompany = async (req, res) => {
-  try {
-    const company = await CompanyInfos.findByPk(req.params.id);
-    if (!company || company.is_deleted)
-      return res.status(404).json({success: false, message: "Not found"});
-
-    await company.update({is_deleted: true});
-
-    res.status(200).json({success: true, message: "Company deleted"});
-  } catch (error) {
-    res.status(500).json({success: false, message: "Server error"});
+    res.status(400).json({error: error.message});
   }
 };
 
 module.exports = {
-  createCompany,
-  deleteCompany,
   updateCompany,
-  getAllCompanies,
   getCompanyById,
+  getAllCompanies,
+  createCompany,
 };

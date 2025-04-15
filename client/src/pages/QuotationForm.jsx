@@ -1,8 +1,12 @@
 /** @format */
 
 import React, {useState} from "react";
+import InvoiceTemplate1 from "../../template/InvoiceTemplate1";
+import InvoiceTemplate2 from "../../template/InvoiceTemplate2";
+import InvoiceTemplate3 from "../../template/InvoiceTemplate3";
 
 const QuotationForm = () => {
+  // FormValues logic
   const [formValues, setFormValues] = useState({
     category: "Design Services",
     invoice_no: "NG00906",
@@ -54,15 +58,98 @@ const QuotationForm = () => {
     }));
   };
 
+  const addItem = () => {
+    setFormValues((prev) => ({
+      ...prev,
+      items: [
+        ...prev.items,
+        {
+          description: "",
+          month: "",
+          monthly_price: "",
+          total_price: "",
+        },
+      ],
+    }));
+  };
+
+  const removeItem = (index) => {
+    setFormValues((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleClear = (e) => {
+    e.preventDefault();
+    setFormValues({
+      category: "",
+      invoice_no: "",
+      issue_date: "",
+      due_date: "",
+      project_name: "",
+      customer_name: "",
+      customer_phone: "",
+      customer_gst: "",
+      customer_company: "",
+      customerEmail: "",
+      pannumber: "",
+      pancode: "",
+      tax_percent: "",
+      total_amount: "",
+      gstcalculated: "",
+      houseNo: "",
+      roadStreet: "",
+      city: "",
+      district: "",
+      items: [],
+    });
+  };
+
+  // box selection
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const components = [
+    <InvoiceTemplate1 invoiceData={formValues} />,
+    <InvoiceTemplate2 invoiceData={formValues} />,
+    <InvoiceTemplate3 invoiceData={formValues} />,
+  ];
+
+  const handlePreview = (index) => {
+    setSelectedIndex(index);
+    setModalOpen(true); // Open the modal when preview is clicked
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
+  const invoiceUrls = [
+    "/firstInvoice.png",
+    "/secondInvoice.png",
+    "/thirdInvoice.png",
+  ];
+
+  const [selectedBox, setSelectedBox] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const handleBoxClick = (e, index) => {
+    e.stopPropagation();
+    console.log("index", index);
+    setSelectedBox(index);
+    setSelectedImage(index);
+    setIsModalOpen(true);
+    setFormValues({...formValues, invoice_patent: index + 1});
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formValues);
+    console.log("Form submitted with values:", formValues);
   };
 
   return (
     <div className='p-8 max-w-8xl mx-auto bg-white rounded-lg shadow-lg'>
-      <h2 className='text-2xl font-bold mb-6'>Invoice Form</h2>
-
       <form onSubmit={handleSubmit}>
         {/* Client Details */}
         <div className='mb-6'>
@@ -280,6 +367,37 @@ const QuotationForm = () => {
           </div>
         </div>
 
+        <div className='mb-6'>
+          <h4 className='font-semibold text-xl mb-4'>Discount</h4>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            <div>
+              <label className='block mb-1'>Discount Type</label>
+
+              <select
+                name='discountType'
+                id='discountType'
+                value={formValues.discountType}
+                onChange={handleChange}
+                className='border border-gray-300 rounded-md p-2 w-full'
+              >
+                <option value=''>--Select--</option>
+                <option value='percentage'>Percentage</option>
+                <option value='amount'>Amount</option>
+              </select>
+            </div>
+            <div>
+              <label className='block mb-1'>Discount Type</label>
+              <input
+                name='discountValue'
+                value={formValues.discountValue}
+                onChange={handleChange}
+                placeholder='Discount Value'
+                className='border border-gray-300 rounded-md p-2 w-full'
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Items */}
         <div className='mb-6'>
           <h4 className='font-semibold text-xl mb-4'>Items</h4>
@@ -292,7 +410,7 @@ const QuotationForm = () => {
                 <th className='border p-2'>Total Price</th>
               </tr>
             </thead>
-            <tbody>
+            {/* <tbody>
               {formValues.items.map((item, index) => (
                 <tr key={index}>
                   <td className='border p-2'>
@@ -333,20 +451,153 @@ const QuotationForm = () => {
                   </td>
                 </tr>
               ))}
+            </tbody> */}
+            <tbody>
+              {formValues.items.map((item, index) => (
+                <tr key={index}>
+                  <td className='border p-2'>
+                    <input
+                      name='description'
+                      value={item.description}
+                      onChange={(e) => handleItemChange(index, e)}
+                      placeholder='Item Description'
+                      className='border border-gray-300 rounded-md p-2 w-full'
+                    />
+                  </td>
+                  <td className='border p-2'>
+                    <input
+                      name='month'
+                      value={item.month}
+                      onChange={(e) => handleItemChange(index, e)}
+                      placeholder='Month'
+                      className='border border-gray-300 rounded-md p-2 w-full'
+                    />
+                  </td>
+                  <td className='border p-2'>
+                    <input
+                      name='monthly_price'
+                      value={item.monthly_price}
+                      onChange={(e) => handleItemChange(index, e)}
+                      placeholder='Monthly Price'
+                      className='border border-gray-300 rounded-md p-2 w-full'
+                    />
+                  </td>
+                  <td className='border p-2'>
+                    <input
+                      name='total_price'
+                      value={item.total_price}
+                      onChange={(e) => handleItemChange(index, e)}
+                      placeholder='Total Price'
+                      className='border border-gray-300 rounded-md p-2 w-full'
+                    />
+                  </td>
+                  <td className='border p-2 text-center'>
+                    <button
+                      type='button'
+                      onClick={() => removeItem(index)}
+                      className='text-red-500 hover:underline'
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
 
-        {/* Submit Button */}
-        <div className='flex justify-end'>
+        <div className='mt-4 flex justify-end'>
+          <button
+            type='button'
+            onClick={addItem}
+            className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'
+          >
+            + Add Item
+          </button>
+        </div>
+      </form>
+
+      <div className='flex space-x-4 mt-10'>
+        {invoiceUrls.map((url, index) => (
+          <div
+            key={index}
+            className={`relative h-[20vh] w-[20vw] border-2 p-4 rounded-lg cursor-pointer transition-all duration-300 flex justify-center items-center ${
+              selectedBox === index ? "border-blue-500" : "border-gray-300"
+            }`}
+            onClick={() => handleDoAll(index)}
+            style={{
+              backgroundImage: `url(${url})`,
+              backgroundSize: "cover",
+              backgroundPosition: "top",
+            }}
+          >
+            {selectedBox === index && (
+              <div className='absolute inset-0 bg-white opacity-50'></div>
+            )}
+            <span className='absolute top-2 right-2 text-green-500'>
+              {selectedBox === index && "✔️"}
+            </span>
+            {/* Separate Preview Button Click */}
+            <div
+              onClick={(e) => handleBoxClick(e, index)}
+              className='text-center relative z-10 font-bold text-white bg-black bg-opacity-50 px-2 py-1 rounded'
+            >
+              Preview
+            </div>
+          </div>
+        ))}
+
+        {/* MODAL */}
+        {isModalOpen && (
+          <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20'>
+            <div className='bg-white p-8 rounded-lg shadow-lg max-w-full max-h-full flex flex-col items-center overflow-hidden'>
+              {/* Scrollable Content Area */}
+              <div className='overflow-y-auto max-h-[80vh] w-full flex justify-center'>
+                <div className='w-full max-w-[800px]'>
+                  {selectedImage === 0 && (
+                    <InvoiceTemplate1 invoiceData={formValues} />
+                  )}
+                  {selectedImage === 1 && (
+                    <InvoiceTemplate2 invoiceData={formValues} />
+                  )}
+                  {selectedImage === 2 && (
+                    <InvoiceTemplate3 invoiceData={formValues} />
+                  )}
+                </div>
+              </div>
+
+              {/* Close Button */}
+              <button
+                className='mt-4 bg-blue-500 text-white px-6 py-2 rounded'
+                onClick={() => setIsModalOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className='flex flex-row justify-end gap-4'>
+        <div className='flex justify-end mt-5'>
+          <button
+            onClick={handleClear}
+            type='button'
+            className='bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition duration-200'
+          >
+            Clear
+          </button>
+        </div>
+        <div className='flex justify-end mt-5'>
           <button
             type='submit'
-            className='bg-blue-500 text-white py-2 px-4 rounded-md'
+            onClick={handleSubmit}
+            className='bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200'
           >
             Submit
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
