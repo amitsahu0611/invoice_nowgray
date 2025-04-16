@@ -1,11 +1,11 @@
 /** @format */
 
 import React, {useState} from "react";
-import {showError} from "../../utils/config";
+import {showError, showSuccess} from "../../utils/config";
 import {createCompany} from "../redux/slice/company.slice";
 import {useDispatch} from "react-redux";
 
-const CreateCompany = ({onSubmit}) => {
+const CreateCompany = ({setActiveTab}) => {
   const dispatch = useDispatch();
 
   const [form, setForm] = useState({
@@ -29,7 +29,11 @@ const CreateCompany = ({onSubmit}) => {
     const {name, email, phone, address, website} = form;
     console.log("form", form);
     if (name && email && phone && address && website) {
-      await dispatch(createCompany(form));
+      const result = await dispatch(createCompany(form));
+      if (result?.payload?.status === 1) {
+        setActiveTab("Company List");
+        showSuccess("Company created successfully.");
+      }
     } else {
       showError("Please fill all the fields.");
     }

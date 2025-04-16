@@ -537,7 +537,6 @@ const QuotationForm = () => {
             <span className='absolute top-2 right-2 text-green-500'>
               {selectedBox === index && "✔️"}
             </span>
-            {/* Separate Preview Button Click */}
             <div
               onClick={(e) => handleBoxClick(e, index)}
               className='text-center relative z-10 font-bold text-white bg-black bg-opacity-50 px-2 py-1 rounded'
@@ -547,7 +546,6 @@ const QuotationForm = () => {
           </div>
         ))}
 
-        {/* MODAL */}
         {isModalOpen && (
           <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20'>
             <div className='bg-white p-8 rounded-lg shadow-lg max-w-full max-h-full flex flex-col items-center overflow-hidden'>

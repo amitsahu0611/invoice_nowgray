@@ -1,36 +1,64 @@
 /** @format */
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {getAllCompany} from "../redux/slice/company.slice";
+import {showError} from "../../utils/config";
+import {createUser} from "../redux/slice/auth.slice";
 
-const CreateStaff = ({companies = [], onSubmit}) => {
+const CreateStaff = ({setActiveTab}) => {
+  const dispatch = useDispatch();
+  const allCompanies = useSelector((state) => state.company.allCompanies);
+
+  const [loading, setLoading] = useState(false);
+  const [companies, setcompanies] = useState([]);
   const [form, setForm] = useState({
     company: "",
     name: "",
     phone: "",
     email: "",
     role: "",
+    password: "",
     status: "active",
   });
+
+  useEffect(() => {
+    dispatch(getAllCompany());
+  }, []);
+
+  useEffect(() => {
+    if (allCompanies?.length > 0) {
+      setcompanies(allCompanies);
+    }
+  }, [allCompanies]);
+
+  console.log("companies", companies);
 
   const handleChange = (field, value) => {
     setForm((prev) => ({...prev, [field]: value}));
   };
 
-  const toggleStatus = () => {
-    setForm((prev) => ({
-      ...prev,
-      status: prev.status === "active" ? "inactive" : "active",
-    }));
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const {company, name, phone, email, role} = form;
-    if (company && name && phone && email && role) {
+    const {company, name, phone, email, role, password} = form;
+
+    if (!company) return showError("Please select a company.");
+    if (!name) return showError("Please enter staff name.");
+    if (!phone) return showError("Please enter staff phone number.");
+    if (!email) return showError("Please enter staff email.");
+    if (!role) return showError("Please enter staff role.");
+    if (!password) return showError("Please enter staff password.");
+
+    setLoading(true);
+    try {
+      await dispatch(createUser(form));
+      setActiveTab("Staff List");
       console.log("Form Submitted: ", form);
-      if (onSubmit) onSubmit(form);
-    } else {
-      alert("Please fill all the fields.");
+      // Optional: navigate or reset form here
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,21 +84,12 @@ const CreateStaff = ({companies = [], onSubmit}) => {
             className='border border-gray-300 rounded-md px-3 py-2'
           >
             <option value=''>-- Select Company --</option>
-            {companies.length > 0 ? (
-              companies.map((company) => (
-                <option key={company.id} value={company.name}>
-                  {company.name}
+            {companies?.length > 0 &&
+              companies?.map((company) => (
+                <option key={company?.company_id} value={company?.company_id}>
+                  {company?.company_name}
                 </option>
-              ))
-            ) : (
-              <>
-                <option value='HTML'>Material Tailwind HTML</option>
-                <option value='React'>Material Tailwind React</option>
-                <option value='Vue'>Material Tailwind Vue</option>
-                <option value='Angular'>Material Tailwind Angular</option>
-                <option value='Svelte'>Material Tailwind Svelte</option>
-              </>
-            )}
+              ))}
           </select>
         </div>
 
@@ -119,6 +138,20 @@ const CreateStaff = ({companies = [], onSubmit}) => {
           />
         </div>
 
+        <div className='flex flex-col'>
+          <label className='mb-1 text-sm font-medium text-gray-700'>
+            Password
+          </label>
+          <input
+            type='password'
+            placeholder='Email Password'
+            value={form.password}
+            onChange={(e) => handleChange("password", e.target.value)}
+            required
+            className='border border-gray-300 rounded-md px-3 py-2'
+          />
+        </div>
+
         {/* Staff Role */}
         <div className='flex flex-col'>
           <label className='mb-1 text-sm font-medium text-gray-700'>
@@ -140,9 +173,9 @@ const CreateStaff = ({companies = [], onSubmit}) => {
         {/* Status Toggle */}
         {/* Status Toggle */}
         <div className='flex flex-col'>
-          <label className='mb-1 text-sm font-medium text-gray-700'>
+          {/* <label className='mb-1 text-sm font-medium text-gray-700'>
             Status
-          </label>
+          </label> */}
           <div className='flex items-center space-x-4'>
             <span className='text-sm font-medium text-gray-600'>Inactive</span>
             <label className='relative inline-flex items-center cursor-pointer'>

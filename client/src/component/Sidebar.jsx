@@ -20,7 +20,9 @@ const Sidebar = () => {
       <div>
         <div className='flex items-center gap-2 mb-6 p-2 mx-auto'>
           <FileText className='w-6 h-6 text-blue-600' />
-          <span className='text-xl font-bold text-gray-800'>Invoice</span>
+          <span className='text-xl font-bold text-gray-800 cursor-pointer'>
+            <Link to='/dashboard'>Invoice</Link>
+          </span>
         </div>
 
         <div className='space-y-2'>

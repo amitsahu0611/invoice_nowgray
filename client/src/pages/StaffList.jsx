@@ -1,95 +1,81 @@
 /** @format */
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Download, Search, Pencil} from "lucide-react";
+import {useDispatch, useSelector} from "react-redux";
+import {getAllUsers} from "../redux/slice/auth.slice";
+import * as XLSX from "xlsx";
 
 const TABLE_HEAD = [
   "Staff Name",
   "Company Name",
   "Phone",
   "Email",
-  "Role",
-  "Actions",
-];
+  "Status",
 
-const TABLE_ROWS = [
-  {
-    icon: "Spotify", // Add icons from lucide-react
-    name: "Spotify",
-    amount: "$2,500",
-    date: "Wed 3:00pm",
-    status: "paid",
-    account: "visa",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    icon: "Amazon",
-    name: "Amazon",
-    amount: "$5,000",
-    date: "Wed 1:00pm",
-    status: "paid",
-    account: "master-card",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    icon: "Pinterest",
-    name: "Pinterest",
-    amount: "$3,400",
-    date: "Mon 7:40pm",
-    status: "pending",
-    account: "master-card",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    icon: "Google",
-    name: "Google",
-    amount: "$1,000",
-    date: "Wed 5:00pm",
-    status: "paid",
-    account: "visa",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    icon: "Netflix",
-    name: "Netflix",
-    amount: "$14,000",
-    date: "Wed 3:30am",
-    status: "cancelled",
-    account: "visa",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
+  "Actions",
 ];
 
 const getStatusColor = (status) => {
   switch (status) {
-    case "paid":
+    case "true":
       return "text-green-600 bg-green-100";
-    case "pending":
+    case "false":
       return "text-yellow-600 bg-yellow-100";
-    case "cancelled":
-      return "text-red-600 bg-red-100";
     default:
       return "text-gray-600 bg-gray-100";
   }
 };
 
-export default function StaffList() {
+export default function StaffList({setActiveTab}) {
+  const dispatch = useDispatch();
+  const allStaffs = useSelector((state) => state.auth.allStaffs);
+
+  const [staffs, setAllStaffs] = useState([]);
+
+  useEffect(() => {
+    dispatch(getAllUsers());
+  }, []);
+
+  useEffect(() => {
+    if (allStaffs.length > 0) {
+      setAllStaffs(allStaffs);
+    }
+  }, [allStaffs]);
+
+  console.log("staffs", staffs);
+
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter the rows based on the search query
-  const filteredRows = TABLE_ROWS.filter(
+  const filteredRows = staffs?.filter(
     (row) =>
-      row.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.amount.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.date.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.account.toLowerCase().includes(searchQuery.toLowerCase())
+      row?.full_Name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row?.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row?.mobile?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row?.company_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleDownload = () => {
+    if (staffs.length === 0) return;
+
+    // Define the fields you want to include in the Excel file
+    const exportData = staffs.map(
+      ({full_Name, company_name, mobile, email, is_active}) => ({
+        "Staff Name": full_Name,
+        "Company Name": company_name,
+        Phone: mobile,
+        Email: email,
+        Status: is_active ? "Active" : "Inactive",
+      })
+    );
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "StaffList");
+
+    XLSX.writeFile(workbook, "StaffList.xlsx");
+  };
 
   return (
     <div className='overflow-hidden rounded-lg border bg-white shadow-md'>
@@ -107,7 +93,10 @@ export default function StaffList() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className='flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-blue-600 border-blue-600 hover:bg-blue-100'>
+          <button
+            onClick={handleDownload}
+            className='flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-blue-600 border-blue-600 hover:bg-blue-100'
+          >
             <Download className='w-4 h-4' />
             Download
           </button>
@@ -129,40 +118,27 @@ export default function StaffList() {
         </thead>
 
         <tbody>
-          {filteredRows.map((row, index) => {
-            const {
-              name,
-              amount,
-              date,
-              status,
-              account,
-              accountNumber,
-              expiry,
-              icon,
-            } = row;
+          {filteredRows?.map((row, index) => {
+            const {company_name, email, full_Name, is_active, mobile} = row;
+            console.log("is_active", is_active);
             return (
               <tr key={index} className='border-b'>
                 <td className='p-4 flex items-center gap-2'>
-                  <span>{name}</span>
+                  <span>{full_Name}</span>
                 </td>
-                <td className='p-4 text-sm'>{amount}</td>
-                <td className='p-4 text-sm'>{date}</td>
+                <td className='p-4 text-sm'>{company_name}</td>
+                <td className='p-4 text-sm'>{mobile}</td>
+                <td className='p-4 text-sm'>{email}</td>
                 <td className='p-4 text-sm'>
                   <span
                     className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
-                      status
+                      is_active
                     )}`}
                   >
-                    {status}
+                    {is_active === true ? "Active" : "Inactive"}
                   </span>
                 </td>
-                <td className='p-4 text-sm'>
-                  <div className='flex items-center gap-2'>
-                    <span className='text-sm'>
-                      {account} {accountNumber}
-                    </span>
-                  </div>
-                </td>
+
                 <td className='p-4 text-sm'>
                   <button className='text-blue-600 hover:text-blue-800'>
                     <Pencil className='h-5 w-5' />

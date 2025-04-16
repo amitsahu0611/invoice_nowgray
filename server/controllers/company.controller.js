@@ -29,7 +29,6 @@ const createCompany = async (req, res) => {
   }
 };
 
-// Get All Companies
 const getAllCompanies = async (req, res) => {
   try {
     const companies = await Company.findAll();
