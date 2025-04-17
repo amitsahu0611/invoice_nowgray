@@ -3,7 +3,7 @@
 import React, {useEffect, useState} from "react";
 import {Download, Search, Pencil} from "lucide-react";
 import {useDispatch, useSelector} from "react-redux";
-import {getAllUsers} from "../redux/slice/auth.slice";
+import {getAllUsers, getUserById} from "../redux/slice/auth.slice";
 import * as XLSX from "xlsx";
 
 const TABLE_HEAD = [
@@ -12,7 +12,6 @@ const TABLE_HEAD = [
   "Phone",
   "Email",
   "Status",
-
   "Actions",
 ];
 
@@ -77,6 +76,13 @@ export default function StaffList({setActiveTab}) {
     XLSX.writeFile(workbook, "StaffList.xlsx");
   };
 
+  const handleEdit = (id) => {
+    if (id) {
+      dispatch(getUserById(id));
+      setActiveTab("Create Staff");
+    }
+  };
+
   return (
     <div className='overflow-hidden rounded-lg border bg-white shadow-md'>
       <div className='flex items-center justify-between p-4 border-b'>
@@ -119,7 +125,14 @@ export default function StaffList({setActiveTab}) {
 
         <tbody>
           {filteredRows?.map((row, index) => {
-            const {company_name, email, full_Name, is_active, mobile} = row;
+            const {
+              company_name,
+              email,
+              full_Name,
+              is_active,
+              mobile,
+              company_id,
+            } = row;
             console.log("is_active", is_active);
             return (
               <tr key={index} className='border-b'>
@@ -140,7 +153,10 @@ export default function StaffList({setActiveTab}) {
                 </td>
 
                 <td className='p-4 text-sm'>
-                  <button className='text-blue-600 hover:text-blue-800'>
+                  <button
+                    onClick={() => handleEdit(company_id)}
+                    className='text-blue-600 hover:text-blue-800'
+                  >
                     <Pencil className='h-5 w-5' />
                   </button>
                 </td>

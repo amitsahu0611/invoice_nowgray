@@ -56,16 +56,29 @@ const getCompanyById = async (req, res) => {
 const updateCompany = async (req, res) => {
   try {
     const {id} = req.params;
-    const [updated] = await Company.update(req.body, {
-      where: {company_id: id},
-    });
+    const [updated] = await Company.update(
+      {
+        company_name: req.body.name,
+        company_email: req.body.email,
+        company_phone: req.body.phone,
+        company_address: req.body.address,
+        gst: req.body.gst,
+        website: req.body.website,
+        color: req.body.color,
+        bgColor: req.body.bgColor,
+        status: req.body.status,
+      },
+      {
+        where: {company_id: id},
+      }
+    );
 
     if (updated === 0) {
       return res.status(404).json({error: "Company not found or no changes"});
     }
 
     const updatedCompany = await Company.findByPk(id);
-    res.json(updatedCompany);
+    res.json(createSuccess("Company updated successfully", updatedCompany));
   } catch (error) {
     res.status(400).json({error: error.message});
   }

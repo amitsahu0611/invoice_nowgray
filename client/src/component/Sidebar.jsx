@@ -14,6 +14,11 @@ import {
 import {Link} from "react-router-dom"; // Import Link for navigation
 
 const Sidebar = () => {
+  const logout = () => {
+    localStorage.clear(); // Clear local storage
+    window.location.href = "/"; // Redirect to the homepage or login page
+  };
+
   return (
     <div className='fixed top-0 left-0 h-screen w-[320px] bg-white shadow-lg p-4 flex flex-col justify-between z-50'>
       {/* Header */}
@@ -83,7 +88,10 @@ const Sidebar = () => {
           </Link>
 
           {/* Log Out */}
-          <div className='flex items-center gap-3 px-3 py-2 hover:bg-red-100 rounded-lg cursor-pointer text-red-600 font-medium'>
+          <div
+            onClick={logout}
+            className='flex items-center gap-3 px-3 py-2 hover:bg-red-100 rounded-lg cursor-pointer text-red-600 font-medium'
+          >
             <LogOut size={20} />
             Log Out
           </div>

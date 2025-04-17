@@ -3,7 +3,8 @@
 import React, {useEffect, useState} from "react";
 import {Download, Search, Pencil} from "lucide-react";
 import {useDispatch, useSelector} from "react-redux";
-import {getAllCompany} from "../redux/slice/company.slice";
+import {getAllCompany, getCompanyById} from "../redux/slice/company.slice";
+import {setActive} from "@material-tailwind/react/components/Tabs/TabsContext";
 
 const TABLE_HEAD = [
   "Sr. No.",
@@ -25,7 +26,7 @@ const getStatusColor = (status) => {
   }
 };
 
-export default function CompanyList() {
+export default function CompanyList({setActiveTab}) {
   const dispatch = useDispatch();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,6 +54,13 @@ export default function CompanyList() {
       row.status?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       row.website?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleEdit = (id) => {
+    if (id) {
+      dispatch(getCompanyById(id));
+      setActiveTab("Create Company");
+    }
+  };
 
   return (
     <div className='overflow-hidden rounded-lg mt-9 border bg-white shadow-md'>
@@ -93,7 +101,13 @@ export default function CompanyList() {
 
         <tbody>
           {filteredRows?.map((row, index) => {
-            const {company_email, company_name, company_phone, status} = row;
+            const {
+              company_email,
+              company_name,
+              company_phone,
+              status,
+              company_id,
+            } = row;
             return (
               <tr key={index} className='border-b'>
                 <td className='p-4 text-sm'>{index + 1}</td>
@@ -110,7 +124,10 @@ export default function CompanyList() {
                   </span>
                 </td>
                 <td className='p-4 text-sm'>
-                  <button className='text-blue-600 hover:text-blue-800'>
+                  <button
+                    onClick={() => handleEdit(company_id)}
+                    className='text-blue-600 hover:text-blue-800'
+                  >
                     <Pencil className='h-5 w-5' />
                   </button>
                 </td>

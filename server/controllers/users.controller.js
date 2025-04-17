@@ -69,6 +69,10 @@ const createUser = async (req, res) => {
       return res.json(createError("User with this email already exists."));
     }
 
+    const companyName = await Company.findOne({
+      where: {company_id: ObjReq.company},
+    });
+
     // Map form fields to DB fields
     const newUser = {
       company_id: ObjReq.company,
@@ -76,6 +80,7 @@ const createUser = async (req, res) => {
       email: ObjReq.email,
       password: hashPassword(ObjReq.password),
       mobile: ObjReq.phone,
+      companyName: companyName.company_name,
       role_id: getRoleIdFromRoleName(ObjReq.role), // We'll define this below
       is_active: ObjReq.status === "active",
       created_by: req.user?.user_id || null, // if you pass logged-in user info
@@ -121,8 +126,53 @@ const getAllStaffs = async (req, res) => {
   }
 };
 
+const getUserById = async (req, res) => {
+  try {
+    const user = await Users.findOne({
+      where: {
+        user_id: req.params.id,
+        is_deleted: false,
+      },
+    });
+
+    if (!user) return res.status(404).json({message: "User not found"});
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({message: "Server error"});
+  }
+};
+
+const updateUserById = async (req, res) => {
+  try {
+    const {id} = req.params;
+
+    if (req.body.password) {
+      req.body.password = hashPassword(req.body.password);
+    }
+
+    const [updated] = await Users.update(req.body, {
+      where: {user_id: id, is_deleted: false},
+    });
+
+    if (updated === 0) {
+      return res.status(404).json({message: "User not found or no changes"});
+    }
+
+    const updatedUser = await Users.findOne({where: {user_id: id}});
+
+    res.status(200).json(createSuccess(updatedUser));
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({message: "Server error"});
+  }
+};
+
 module.exports = {
   login,
   createUser,
   getAllStaffs,
+  getUserById,
+  updateUserById,
 };

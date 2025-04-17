@@ -8,6 +8,7 @@ const path = require("path");
 const {dbConnection} = require("./connection/db_connection");
 const userRouter = require("./routes/users.route");
 const companyRouter = require("./routes/company.route");
+const quotationRouter = require("./routes/quotation.route");
 const app = express();
 
 dotenv.config();
@@ -30,6 +31,7 @@ app.use(express.urlencoded({limit: "10mb", extended: true}));
 
 app.use("/api/user", userRouter);
 app.use("/api/company", companyRouter);
+app.use("/api/quotation", quotationRouter);
 
 app.listen(PORT, () => {
   dbConnection();

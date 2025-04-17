@@ -2,7 +2,6 @@
 
 import React, {useState} from "react";
 import Topbar from "../component/Topbar";
-import Tabs from "../component/Tabs";
 import CreateCompany from "./CreateCompany";
 import CompanyList from "./CompanyList";
 

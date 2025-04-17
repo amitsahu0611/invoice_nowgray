@@ -5,7 +5,8 @@ import {jsPDF} from "jspdf";
 import html2canvas from "html2canvas";
 import {forImage, showSuccess} from "../utils/config";
 
-const InvoiceTemplate1 = ({invoiceData}) => {
+const InvoiceTemplate1 = ({invoiceData, download}) => {
+  console.log("download", download);
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const options = {year: "numeric", month: "long", day: "numeric"};

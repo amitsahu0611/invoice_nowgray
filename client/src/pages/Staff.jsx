@@ -23,7 +23,7 @@ const Staff = () => {
   return (
     <div>
       <div>
-        <Topbar name='Company' />
+        <Topbar name='Staff' />
         <div className='w-full rounded-lg shadow-sm'>
           {/* Tab Headers */}
           <div className='flex gap-2 border-b px-4 pt-4'>

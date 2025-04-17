@@ -16,6 +16,10 @@ const Users = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    company_name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     full_Name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -40,7 +44,6 @@ const Users = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
-
     resetPasswordToken: {
       type: DataTypes.STRING,
       allowNull: true,

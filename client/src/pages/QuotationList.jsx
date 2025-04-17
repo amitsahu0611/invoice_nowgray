@@ -1,68 +1,28 @@
 /** @format */
 
-import React, {useState} from "react";
-import {Download, Search, Pencil} from "lucide-react";
+import React, {useEffect, useState} from "react";
+import {Download, Search, Pencil, Eye} from "lucide-react";
+import {
+  getAllQuotations,
+  getQuotationById,
+  updateQuotation,
+} from "../redux/slice/quotation.slice";
+import {useDispatch, useSelector} from "react-redux";
+import InvoiceTemplate1 from "../../template/InvoiceTemplate1";
+import {getUserData, showError, showSuccess} from "../../utils/config";
 
 const TABLE_HEAD = [
-  "Staff Name",
-  "Company Name",
+  "Quotation ID",
+  "Customer Name",
   "Phone",
   "Email",
-  "Role",
+  "Issue Date",
+  "Due Date",
+  "Total Amount",
+  "Discount",
+  "Status",
+  "Approve",
   "Actions",
-];
-
-const TABLE_ROWS = [
-  {
-    icon: "Spotify", // Add icons from lucide-react
-    name: "Spotify",
-    amount: "$2,500",
-    date: "Wed 3:00pm",
-    status: "paid",
-    account: "visa",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    icon: "Amazon",
-    name: "Amazon",
-    amount: "$5,000",
-    date: "Wed 1:00pm",
-    status: "paid",
-    account: "master-card",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    icon: "Pinterest",
-    name: "Pinterest",
-    amount: "$3,400",
-    date: "Mon 7:40pm",
-    status: "pending",
-    account: "master-card",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    icon: "Google",
-    name: "Google",
-    amount: "$1,000",
-    date: "Wed 5:00pm",
-    status: "paid",
-    account: "visa",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
-  {
-    icon: "Netflix",
-    name: "Netflix",
-    amount: "$14,000",
-    date: "Wed 3:30am",
-    status: "cancelled",
-    account: "visa",
-    accountNumber: "1234",
-    expiry: "06/2026",
-  },
 ];
 
 const getStatusColor = (status) => {
@@ -78,18 +38,98 @@ const getStatusColor = (status) => {
   }
 };
 
-export default function QuotationList() {
+export default function QuotationList({setActiveTab}) {
+  const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [quotations, setAllQuotations] = useState([]);
+  const [userData, setUserData] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getUserData();
+      console.log("data", data);
+      setUserData(data);
+    };
+
+    fetchData();
+  }, []);
+
+  const allQuotations = useSelector((state) => state.quotation.allQuotations);
+  console.log("quotations", quotations);
+
+  useEffect(() => {
+    dispatch(getAllQuotations());
+  }, []);
+
+  useEffect(() => {
+    if (allQuotations?.length > 0) {
+      setAllQuotations(allQuotations);
+    }
+  }, [allQuotations]);
 
   // Filter the rows based on the search query
-  const filteredRows = TABLE_ROWS.filter(
+  const filteredRows = quotations?.filter(
     (row) =>
-      row.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.amount.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.date.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.account.toLowerCase().includes(searchQuery.toLowerCase())
+      row?.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row?.customer_phone.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row?.customerEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row?.issue_date.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row?.due_date.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row?.total_amount.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleView = (id) => {
+    dispatch(getQuotationById(id));
+    setActiveTab("Create Quotation");
+  };
+
+  const handleDownload = (data) => {
+    <InvoiceTemplate1 invoiceData={data} download={true} />;
+  };
+
+  const handleApprove = async (id) => {
+    console.log("Approved ID:", id);
+    let approvalData = {
+      quotation_id: id,
+      approvedStatus:
+        quotations.find((quote) => quote.quotation_id === id)
+          ?.approvedStatus === "approved"
+          ? "pending"
+          : "approved",
+      approvedBy: userData?.user_id,
+      approvedByName: userData?.full_Name,
+      ApproverCompanyId: userData?.company_id,
+      approvedDate: new Date().toISOString(),
+      ApproverCompanyName: userData?.company_name,
+      approverName: userData?.full_Name,
+    };
+
+    if (approvalData?.approvedStatus === "approved") {
+      showError("Quotation is already approved");
+      return;
+    }
+
+    if (approvalData) {
+      const data = await dispatch(updateQuotation({id, data: approvalData}));
+      if (data?.payload?.status == 1) {
+        showSuccess("Quotation Approved Successfully");
+      }
+    }
+
+    const updated = quotations.map((quote) => {
+      if (quote.quotation_id === id) {
+        return {
+          ...quote,
+          approvedStatus:
+            quote.approvedStatus === "approved" ? "pending" : "approved",
+        };
+      }
+      return quote;
+    });
+
+    setAllQuotations(updated);
+  };
 
   return (
     <div className='overflow-hidden rounded-lg border bg-white shadow-md'>
@@ -131,48 +171,48 @@ export default function QuotationList() {
         </thead>
 
         <tbody>
-          {filteredRows.map((row, index) => {
-            const {
-              name,
-              amount,
-              date,
-              status,
-              account,
-              accountNumber,
-              expiry,
-              icon,
-            } = row;
-            return (
-              <tr key={index} className='border-b'>
-                <td className='p-4 flex items-center gap-2'>
-                  <span>{name}</span>
-                </td>
-                <td className='p-4 text-sm'>{amount}</td>
-                <td className='p-4 text-sm'>{date}</td>
-                <td className='p-4 text-sm'>
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
-                      status
-                    )}`}
-                  >
-                    {status}
-                  </span>
-                </td>
-                <td className='p-4 text-sm'>
-                  <div className='flex items-center gap-2'>
-                    <span className='text-sm'>
-                      {account} {accountNumber}
-                    </span>
-                  </div>
-                </td>
-                <td className='p-4 text-sm'>
-                  <button className='text-blue-600 hover:text-blue-800'>
-                    <Pencil className='h-5 w-5' />
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
+          {filteredRows?.map((quote, index) => (
+            <tr key={index} className='border-b'>
+              <td className='p-4 text-sm'>{quote?.quotation_id}</td>
+              <td className='p-4 text-sm'>{quote?.customer_name}</td>
+              <td className='p-4 text-sm'>{quote?.customer_phone}</td>
+              <td className='p-4 text-sm'>{quote?.customerEmail}</td>
+              <td className='p-4 text-sm'>{quote?.issue_date}</td>
+              <td className='p-4 text-sm'>{quote?.due_date}</td>
+              <td className='p-4 text-sm'>₹{quote?.total_amount}</td>
+              <td className='p-4 text-sm'>{quote?.discountValue || "-"}</td>
+              <td className='p-4 text-sm capitalize'>
+                <span
+                  className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
+                    quote?.approvedStatus
+                  )}`}
+                >
+                  {quote?.approvedStatus}
+                </span>
+              </td>
+              <td className='p-4 text-sm text-center'>
+                <input
+                  type='checkbox'
+                  checked={quote?.approvedStatus === "approved"}
+                  onChange={() => handleApprove(quote.quotation_id)}
+                />
+              </td>
+              <td className='p-4 text-sm'>
+                <button
+                  onClick={() => handleView(quote?.quotation_id)}
+                  className='text-blue-600 hover:text-blue-800'
+                >
+                  <Eye className='h-5 w-5' />
+                </button>
+                <button
+                  onClick={() => handleDownload(quote)}
+                  className='text-green-600 hover:text-green-800'
+                >
+                  <Download className='h-5 w-5 ml-3' />
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

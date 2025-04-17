@@ -49,13 +49,7 @@ export const getToken = async () => {
 export const getUserData = async () => {
   try {
     const storedUserData = await localStorage.getItem("userInfo");
-    if (storedUserData) {
-      const objUserDetails = JSON.parse(storedUserData);
-      const userData = objUserDetails;
-
-      return userData;
-    }
-    return null;
+    return JSON.parse(storedUserData);
   } catch (error) {
     console.error("Error retrieving user data:", error);
     return null;

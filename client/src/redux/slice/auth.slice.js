@@ -4,15 +4,14 @@ import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import axios from "axios";
 import {Base_URL} from "../../../utils/config";
 
-// Fetch bank data
-// export const login = createAsyncThunk("login", async (data, thunkAPI) => {
-//   try {
-//     const response = await axios.post(`${Base_URL}login`, data);
-//     return response.data;
-//   } catch (error) {
-//     return thunkAPI.rejectWithValue({error: error.message});
-//   }
-// });
+export const login = createAsyncThunk("login", async (data, thunkAPI) => {
+  try {
+    const response = await axios.post(`${Base_URL}user/login`, data);
+    return response.data;
+  } catch (error) {
+    return thunkAPI.rejectWithValue({error: error.message});
+  }
+});
 
 export const createUser = createAsyncThunk(
   "createUser",
@@ -36,41 +35,67 @@ export const getAllUsers = createAsyncThunk("getAllUsers", async (thunkAPI) => {
   }
 });
 
+export const getUserById = createAsyncThunk(
+  "getUserById",
+  async (id, thunkAPI) => {
+    try {
+      const response = await axios.get(`${Base_URL}user/getUserById/${id}`);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({error: error.message});
+    }
+  }
+);
+
+export const updateUser = createAsyncThunk(
+  "updateUser",
+  async ({id, data}, thunkAPI) => {
+    try {
+      const response = await axios.put(
+        `${Base_URL}user/updateUsers/${id}`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({error: error.message});
+    }
+  }
+);
+
 // Create a partner slice
 const authSlice = createSlice({
   name: "authSlice",
   initialState: {
     allStaffs: [],
-    // forgotPassword: {},
-    // loading: false,
-    // error: null,
+    singleStaff: {},
+    loading: false,
+    error: null,
   },
   reducers: {},
 
   extraReducers: (builder) => {
     builder
-      // .addCase(login.pending, (state) => {
-      //   state.loading = true;
-      //   state.error = null;
-      // })
-      // .addCase(login.fulfilled, (state, action) => {
-      //   state.loading = false;
-      //   state.authData = action.payload;
-      // })
-      // .addCase(login.rejected, (state, action) => {
-      //   state.loading = false;
-      //   state.error = action.payload;
-      // })
       .addCase(getAllUsers.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(getAllUsers.fulfilled, (state, action) => {
-        console.log("getAllUsers", action.payload.result);
         state.loading = false;
         state.allStaffs = action.payload.result;
       })
       .addCase(getAllUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(getUserById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUserById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.singleStaff = action.payload;
+      })
+      .addCase(getUserById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

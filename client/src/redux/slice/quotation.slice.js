@@ -4,13 +4,13 @@ import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {Base_URL} from "../../../utils/config";
 import axios from "axios";
 
-export const createCompany = createAsyncThunk(
-  "createCompany",
+export const createQuotation = createAsyncThunk(
+  "createQuotation",
   async (data, thunkAPI) => {
     console.log("data", data);
     try {
       const response = await axios.post(
-        `${Base_URL}company/createCompany`,
+        `${Base_URL}quotation/createQuotation`,
         data
       );
       return response.data;
@@ -20,11 +20,11 @@ export const createCompany = createAsyncThunk(
   }
 );
 
-export const getAllCompany = createAsyncThunk(
-  "getAllCompany",
+export const getAllQuotations = createAsyncThunk(
+  "getAllQuotations",
   async (thunkAPI) => {
     try {
-      const response = await axios.get(`${Base_URL}company/getAllCompanies`);
+      const response = await axios.get(`${Base_URL}quotation/getAllQuotations`);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});
@@ -32,12 +32,12 @@ export const getAllCompany = createAsyncThunk(
   }
 );
 
-export const getCompanyById = createAsyncThunk(
-  "getCompanyById",
+export const getQuotationById = createAsyncThunk(
+  "getQuotationById",
   async (id, thunkAPI) => {
     try {
       const response = await axios.get(
-        `${Base_URL}company/getCompanyById/${id}`
+        `${Base_URL}quotation/getQuotationById/${id}`
       );
       return response.data;
     } catch (error) {
@@ -46,12 +46,12 @@ export const getCompanyById = createAsyncThunk(
   }
 );
 
-export const updateCompany = createAsyncThunk(
-  "updateCompany",
+export const updateQuotation = createAsyncThunk(
+  "updateQuotation",
   async ({id, data}, thunkAPI) => {
     try {
       const response = await axios.put(
-        `${Base_URL}company/updateCompany/${id}`,
+        `${Base_URL}quotation/updateQuotation/${id}`,
         data
       );
       return response.data;
@@ -61,39 +61,39 @@ export const updateCompany = createAsyncThunk(
   }
 );
 
-const companySlice = createSlice({
-  name: "companySlice",
+const quotationSlice = createSlice({
+  name: "quotationSlice",
   initialState: {
     loading: false,
     error: null,
-    allCompanies: [],
-    singleCompanyData: {},
+    allQuotations: [],
+    singleQuotationData: {},
   },
   reducers: {},
 
   extraReducers: (builder) => {
     builder
-      .addCase(getAllCompany.pending, (state) => {
+      .addCase(getAllQuotations.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(getAllCompany.fulfilled, (state, action) => {
+      .addCase(getAllQuotations.fulfilled, (state, action) => {
         state.loading = false;
-        state.allCompanies = action.payload;
+        state.allQuotations = action.payload.result;
       })
-      .addCase(getAllCompany.rejected, (state, action) => {
+      .addCase(getAllQuotations.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(getCompanyById.pending, (state) => {
+      .addCase(getQuotationById.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(getCompanyById.fulfilled, (state, action) => {
+      .addCase(getQuotationById.fulfilled, (state, action) => {
         state.loading = false;
-        state.singleCompanyData = action.payload;
+        state.singleQuotationData = action.payload.result;
       })
-      .addCase(getCompanyById.rejected, (state, action) => {
+      .addCase(getQuotationById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
@@ -101,4 +101,4 @@ const companySlice = createSlice({
 });
 
 // Export the reducer and actions
-export default companySlice.reducer;
+export default quotationSlice.reducer;
