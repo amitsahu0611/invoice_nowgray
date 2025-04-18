@@ -7,14 +7,13 @@ import InvoiceTemplate3 from "../../template/InvoiceTemplate3";
 import {createQuotation} from "../redux/slice/quotation.slice";
 import {useDispatch, useSelector} from "react-redux";
 import {showSuccess} from "../../utils/config";
+import {updateInvoice} from "../redux/slice/invoice.slice";
 
-const QuotationForm = ({setActiveTab}) => {
-  const quotationData = useSelector(
-    (state) => state.quotation.singleQuotationData
-  );
+const InvoiceForm = ({setActiveTab}) => {
+  const quotationData = useSelector((state) => state.invoice.singleInvoice);
+
   console.log("quotationData", quotationData);
 
-  // FormValues logic
   const dispatch = useDispatch();
   const [updated, setUpdated] = useState(false);
   const [formValues, setFormValues] = useState({
@@ -84,7 +83,7 @@ const QuotationForm = ({setActiveTab}) => {
         termsAndConditions: quotationData.termsAndConditions || "",
         notes: quotationData.notes || "",
         items:
-          quotationData.items?.map((item) => ({
+          quotationData.invoice_items?.map((item) => ({
             description: item.description || "",
             month: item.month || "",
             monthly_price: item.monthly_price || "",
@@ -244,19 +243,32 @@ const QuotationForm = ({setActiveTab}) => {
     setFormValues({...formValues, invoice_patent: index + 1});
   };
 
-  const handleSubmit = async (e) => {
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   console.log("Form submitted with values:", formValues);
+  //   const data = await dispatch(createQuotation(formValues));
+  //   if (data?.payload?.status == 1) {
+  //     setActiveTab("Quotation List");
+  //     showSuccess("Quotation Created Successfully and cannot be modified");
+  //   }
+  // };
+
+  const handleUpdate = async (e) => {
     e.preventDefault();
     console.log("Form submitted with values:", formValues);
-    const data = await dispatch(createQuotation(formValues));
+    const data = await dispatch(
+      updateInvoice({id: quotationData.invoice_id, data: formValues})
+    );
+    console.log("data", data);
     if (data?.payload?.status == 1) {
-      setActiveTab("Quotation List");
-      showSuccess("Quotation Created Successfully and cannot be modified");
+      setActiveTab("Invoice List");
+      showSuccess("Invoice Updated Successfully");
     }
   };
 
   return (
     <div className='p-8 max-w-8xl mx-auto bg-white rounded-lg shadow-lg'>
-      <form onSubmit={handleSubmit}>
+      <form>
         {/* Client Details */}
         <div className='mb-6'>
           <h4 className='font-semibold text-xl mb-4'>Client Details</h4>
@@ -667,20 +679,18 @@ const QuotationForm = ({setActiveTab}) => {
             Clear
           </button>
         </div>
-        {!updated && (
-          <div className='flex justify-end mt-5'>
-            <button
-              type='submit'
-              onClick={handleSubmit}
-              className='bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200'
-            >
-              Submit
-            </button>
-          </div>
-        )}
+        <div className='flex justify-end mt-5'>
+          <button
+            type='submit'
+            onClick={updated && handleUpdate}
+            className='bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200'
+          >
+            Update Invoice
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default QuotationForm;
+export default InvoiceForm;

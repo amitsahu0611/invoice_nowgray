@@ -34,7 +34,7 @@ export const validateEmail = (email) => {
 
 export const getToken = async () => {
   try {
-    const storedUserData = await localStorage.getItem("authToken");
+    const storedUserData = await localStorage.getItem("token");
     if (storedUserData) {
       const Token = storedUserData;
       return Token;
@@ -55,79 +55,6 @@ export const getUserData = async () => {
     return null;
   }
 };
-
-// export const getmenuPermission = async (currentUrl) => {
-//   console.log("currentUrl", currentUrl);
-//   try {
-//     const storedUserData = JSON.parse(localStorage.getItem("menuPermission"));
-//     const matchedMenu = storedUserData.filter(
-//       (menu) => menu.url === currentUrl
-//     );
-//     if (matchedMenu) {
-//       return matchedMenu;
-//     }
-//     return null;
-//   } catch (error) {
-//     console.error("Error retrieving user data:", error);
-//     return null;
-//   }
-// };
-
-export const getmenuPermission = async (currentUrl) => {
-  console.log("currentUrl", currentUrl);
-  try {
-    const storedUserData = JSON.parse(localStorage.getItem("menuPermission"));
-
-    // First check for the main menus
-    const matchedMenu = storedUserData.find((menu) => menu.url === currentUrl);
-
-    if (matchedMenu) {
-      return matchedMenu;
-    }
-
-    // If not found, check for submenus
-    for (let menu of storedUserData) {
-      const matchedSubmenu = menu.submenus.find(
-        (submenu) => submenu.url === currentUrl
-      );
-      if (matchedSubmenu) {
-        return matchedSubmenu;
-      }
-    }
-
-    // Return null if no match is found
-    return null;
-  } catch (error) {
-    console.error("Error retrieving user data:", error);
-    return null;
-  }
-};
-
-const axiosInstance = axios.create({
-  baseURL: Base_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-axiosInstance.interceptors.request.use(
-  async (config) => {
-    try {
-      const token = await getToken();
-
-      if (token) {
-        config.headers["Authorization"] = `Bearer ${token}`;
-      }
-      return config;
-    } catch (error) {
-      console.error("Error retrieving token:", error);
-      return Promise.reject(error);
-    }
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 export const getYearsArray = () => {
   const startYear = 1995;
@@ -190,5 +117,3 @@ export const TabsEnums = {
   FileNoConfig: "File No Config",
   Template: "Template",
 };
-
-export default axiosInstance;

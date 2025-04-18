@@ -12,6 +12,8 @@ const createQuotation = async (req, res) => {
   //   return;
   try {
     const {
+      company_id,
+      salesPersonId,
       category,
       invoice_no,
       issue_date,
@@ -139,7 +141,6 @@ const getQuotationById = async (req, res) => {
 const updateQuotation = async (req, res) => {
   try {
     console.log("req.body", req.body);
-    // return;
     const {id} = req.params;
 
     const quotation = await Quotation.findByPk(id);
@@ -154,10 +155,8 @@ const updateQuotation = async (req, res) => {
     const items = req.body.items;
 
     if (Array.isArray(items) && items?.length > 0) {
-      // Delete existing items for quotation
       await QuotationItem.destroy({where: {quotation_id: id}});
 
-      // Add new ones
       await Promise.all(
         items.map((item) =>
           QuotationItem.create({
@@ -172,14 +171,12 @@ const updateQuotation = async (req, res) => {
       where: {quotation_id: id},
     });
 
-    res
-      .status(200)
-      .json(
-        createSuccess("Quotation updated successfully", {
-          quotation,
-          items: updatedItems,
-        })
-      );
+    res.status(200).json(
+      createSuccess("Quotation updated successfully", {
+        quotation,
+        items: updatedItems,
+      })
+    );
   } catch (error) {
     console.error("Update Quotation Error:", error);
     res.status(500).json({success: false, message: "Server error"});

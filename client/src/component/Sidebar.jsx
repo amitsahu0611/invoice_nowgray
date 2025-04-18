@@ -80,11 +80,27 @@ const Sidebar = () => {
           </Link>
 
           <Link
+            to='/dashboard/approvePayment'
+            className='flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg cursor-pointer text-gray-700'
+          >
+            <Settings size={20} />
+            Approve Payment
+          </Link>
+
+          <Link
             to='/dashboard/company'
             className='flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg cursor-pointer text-gray-700'
           >
             <File size={20} />
             Company
+          </Link>
+
+          <Link
+            to='/dashboard/log'
+            className='flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg cursor-pointer text-gray-700'
+          >
+            <File size={20} />
+            Log
           </Link>
 
           {/* Log Out */}

@@ -1,16 +1,20 @@
 /** @format */
 
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {Base_URL} from "../../../utils/config";
-import axios from "axios";
+import {Base_URL, getUserData} from "../../../utils/config";
+import axiosInstance from "../../../utils/axiosInstance";
 
 export const createQuotation = createAsyncThunk(
   "createQuotation",
   async (data, thunkAPI) => {
-    console.log("data", data);
+    const userData = await getUserData();
+
+    data.companyId = userData.companyId || userData.company._id;
+    data.salesPersonId = userData.user_id;
+
     try {
-      const response = await axios.post(
-        `${Base_URL}quotation/createQuotation`,
+      const response = await axiosInstance.post(
+        `quotation/createQuotation`,
         data
       );
       return response.data;
@@ -24,7 +28,7 @@ export const getAllQuotations = createAsyncThunk(
   "getAllQuotations",
   async (thunkAPI) => {
     try {
-      const response = await axios.get(`${Base_URL}quotation/getAllQuotations`);
+      const response = await axiosInstance.get(`quotation/getAllQuotations`);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});
@@ -36,8 +40,8 @@ export const getQuotationById = createAsyncThunk(
   "getQuotationById",
   async (id, thunkAPI) => {
     try {
-      const response = await axios.get(
-        `${Base_URL}quotation/getQuotationById/${id}`
+      const response = await axiosInstance.get(
+        `quotation/getQuotationById/${id}`
       );
       return response.data;
     } catch (error) {
@@ -50,10 +54,26 @@ export const updateQuotation = createAsyncThunk(
   "updateQuotation",
   async ({id, data}, thunkAPI) => {
     try {
-      const response = await axios.put(
-        `${Base_URL}quotation/updateQuotation/${id}`,
+      const response = await axiosInstance.put(
+        `quotation/updateQuotation/${id}`,
         data
       );
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({error: error.message});
+    }
+  }
+);
+
+export const approveQuotation = createAsyncThunk(
+  "approveQuotation",
+  async ({id, data}, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        `quotation/approveQuotation/${id}`,
+        data
+      );
+      console.log("response", response.data);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});

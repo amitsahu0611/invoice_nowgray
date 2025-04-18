@@ -2,19 +2,17 @@
 
 const {DataTypes} = require("sequelize");
 const sequelize = require("../connection/db_connection");
-const QuotationItem = require("./QuotationItem.model");
-const Company = require("./Company.model");
 
-const Quotation = sequelize.define(
-  "quotation",
+const Invoice = sequelize.define(
+  "invoice",
   {
-    quotation_id: {
+    invoice_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
     },
-    salesPersonId: {
+    quotation_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -23,6 +21,10 @@ const Quotation = sequelize.define(
       allowNull: false,
     },
 
+    salesPersonId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     category: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -144,17 +146,23 @@ const Quotation = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+
+    // ✅ New array field to track who downloaded the invoice
+    downloadedByIds: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [],
+    },
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = Quotation;
+module.exports = Invoice;
 
 // const syncDb = async () => {
-//   await Quotation.sync({alter: true});
-
+//   await Invoice.sync({alter: true});
 //   console.log("synced");
 // };
 

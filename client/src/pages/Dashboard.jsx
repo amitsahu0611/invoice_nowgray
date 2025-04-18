@@ -6,12 +6,13 @@ import Quotation from "./Quotation";
 import Invoices from "./Invoices";
 import Users from "./Users";
 import Reports from "./Reports";
-import SettingsPage from "./SettingsPage";
 import Company from "./Company";
 import Sidebar from "../component/Sidebar";
 import Staff from "./Staff";
 import DashboardContent from "./DashboardContent";
 import Payments from "./Payments";
+import ApprovePayment from "./ApprovePayment";
+import Log from "./Log";
 
 const Dashboard = () => {
   return (
@@ -28,6 +29,8 @@ const Dashboard = () => {
           <Route path='/staff' element={<Staff />} />
           <Route path='/payments' element={<Payments />} />
           <Route path='/company' element={<Company />} />
+          <Route path='/approvePayment' element={<ApprovePayment />} />
+          <Route path='/log' element={<Log />} />
         </Routes>
       </div>
     </div>

@@ -1,18 +1,14 @@
 /** @format */
 
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {Base_URL} from "../../../utils/config";
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosInstance";
 
 export const createCompany = createAsyncThunk(
   "createCompany",
   async (data, thunkAPI) => {
     console.log("data", data);
     try {
-      const response = await axios.post(
-        `${Base_URL}company/createCompany`,
-        data
-      );
+      const response = await axiosInstance.post(`company/createCompany`, data);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});
@@ -24,7 +20,7 @@ export const getAllCompany = createAsyncThunk(
   "getAllCompany",
   async (thunkAPI) => {
     try {
-      const response = await axios.get(`${Base_URL}company/getAllCompanies`);
+      const response = await axiosInstance.get(`company/getAllCompanies`);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});
@@ -36,9 +32,7 @@ export const getCompanyById = createAsyncThunk(
   "getCompanyById",
   async (id, thunkAPI) => {
     try {
-      const response = await axios.get(
-        `${Base_URL}company/getCompanyById/${id}`
-      );
+      const response = await axiosInstance.get(`company/getCompanyById/${id}`);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});
@@ -50,8 +44,8 @@ export const updateCompany = createAsyncThunk(
   "updateCompany",
   async ({id, data}, thunkAPI) => {
     try {
-      const response = await axios.put(
-        `${Base_URL}company/updateCompany/${id}`,
+      const response = await axiosInstance.put(
+        `company/updateCompany/${id}`,
         data
       );
       return response.data;

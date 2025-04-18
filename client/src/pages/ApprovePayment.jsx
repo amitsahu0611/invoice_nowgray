@@ -2,22 +2,27 @@
 
 import React, {useState} from "react";
 import Topbar from "../component/Topbar";
-import PaymentReport from "./PaymentReport";
+import ApprovePaymentList from "./ApprovePaymentList";
+import ApprovedPayment from "./ApprovedPayment";
 
-const Reports = () => {
-  const [activeTab, setActiveTab] = useState("Payment Report");
+const ApprovePayment = () => {
+  const [activeTab, setActiveTab] = useState("Approve Payment");
 
   const tabs = [
     {
-      label: "Payment Report",
-      content: <PaymentReport setActiveTab={setActiveTab} />,
+      label: "Approve Payment",
+      content: <ApprovePaymentList setActiveTab={setActiveTab} />,
+    },
+    {
+      label: "Approved List",
+      content: <ApprovedPayment setActiveTab={setActiveTab} />,
     },
   ];
 
   return (
     <div>
       <div>
-        <Topbar name='Report' />
+        <Topbar name='Approve Payments' />
         <div className='w-full rounded-lg shadow-sm'>
           {/* Tab Headers */}
           <div className='flex gap-2 border-b px-4 pt-4'>
@@ -46,4 +51,4 @@ const Reports = () => {
   );
 };
 
-export default Reports;
+export default ApprovePayment;

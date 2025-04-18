@@ -1,58 +1,24 @@
 /** @format */
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Download, Search, Pencil} from "lucide-react";
+import {useDispatch, useSelector} from "react-redux";
+import {getAllPayment, getPaymentById} from "../redux/slice/payment.slice";
+import {formatDate} from "../../utils/config";
 
 const TABLE_HEAD = [
-  "companyId",
-  "invoiceId",
-  "amount",
-  "description",
-  "amountPaid",
-  "method",
-];
-
-const TABLE_ROWS = [
-  {
-    companyId: "COMP001",
-    invoiceId: "INV1001",
-    amount: 1200.0,
-    description: "Monthly subscription",
-    amountPaid: 1200.0,
-    method: "Credit Card",
-  },
-  {
-    companyId: "COMP002",
-    invoiceId: "INV1002",
-    amount: 2500.0,
-    description: "Annual plan",
-    amountPaid: 2000.0,
-    method: "Bank Transfer",
-  },
-  {
-    companyId: "COMP003",
-    invoiceId: "INV1003",
-    amount: 3750.0,
-    description: "Custom service",
-    amountPaid: 3750.0,
-    method: "UPI",
-  },
-  {
-    companyId: "COMP004",
-    invoiceId: "INV1004",
-    amount: 5000.0,
-    description: "Enterprise setup fee",
-    amountPaid: 4000.0,
-    method: "PayPal",
-  },
-  {
-    companyId: "COMP005",
-    invoiceId: "INV1005",
-    amount: 980.0,
-    description: "One-time support",
-    amountPaid: 980.0,
-    method: "Cash",
-  },
+  "S.No",
+  "Invoice Id",
+  "Payment Id",
+  "Company Name",
+  "Amount",
+  "Amount Paid",
+  "Payment Method",
+  "Payment Date",
+  "Payment Status",
+  "Created By",
+  "Approved By",
+  "Action",
 ];
 
 const getStatusColor = (status) => {
@@ -68,19 +34,50 @@ const getStatusColor = (status) => {
   }
 };
 
-export default function PaymentList() {
+export default function PaymentList({setActiveTab}) {
+  const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
+  const [payments, setPayments] = useState([]);
+  console.log("payments", payments);
+
+  const allPayments = useSelector((state) => state.payment.allPayments);
+
+  useEffect(() => {
+    dispatch(getAllPayment());
+  }, []);
+
+  useEffect(() => {
+    if (allPayments?.length > 0) {
+      setPayments(allPayments);
+    }
+  }, [allPayments]);
 
   // Filter the rows based on the search query
-  const filteredRows = TABLE_ROWS.filter(
-    (row) =>
-      row.companyId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.invoiceId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.amount.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.amountPaid.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.method.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredRows = payments?.filter((row) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      row?.companyName?.toLowerCase().includes(query) ||
+      row?.invoiceId?.toString().toLowerCase().includes(query) ||
+      row?.payment_id?.toString().toLowerCase().includes(query) ||
+      row?.amount?.toString().toLowerCase().includes(query) ||
+      row?.amountPaid?.toString().toLowerCase().includes(query) ||
+      row?.method?.toLowerCase().includes(query) ||
+      row?.username?.toLowerCase().includes(query) ||
+      formatDate(row?.createdAt)?.toLowerCase().includes(query)
+    );
+  });
+
+  const handleEdit = async (id) => {
+    if (id) {
+      const data = await dispatch(getPaymentById(id));
+      console.log("data", data);
+      if (data?.payload?.status === 1) {
+        setActiveTab("Create Payment");
+      } else {
+        console.log("error", data?.payload?.error);
+      }
+    }
+  };
 
   return (
     <div className='overflow-hidden rounded-lg mt-9 border bg-white shadow-md'>
@@ -122,30 +119,37 @@ export default function PaymentList() {
         <tbody>
           {filteredRows.map((row, index) => {
             const {
-              name,
-              date,
+              amount,
               amountPaid,
-              status,
-              account,
-              accountNumber,
-              invoiceId,
+              companyId,
               description,
+              invoiceId,
+              method,
+              createdAt,
+              companyName,
+              payment_id,
+              username,
             } = row;
             return (
               <tr key={index} className='border-b'>
-                <td className='p-4 flex items-center gap-2'>
-                  <span>Spotify</span>
-                </td>
+                <td className='p-4 text-sm'>{index + 1}</td>
+
                 <td className='p-4 text-sm'>{invoiceId}</td>
+                <td className='p-4 text-sm'>{payment_id}</td>
+                <td className='p-4 text-sm'>{companyName}</td>
+                <td className='p-4 text-sm'>{amount}</td>
                 <td className='p-4 text-sm'>{amountPaid}</td>
-                <td className='p-4 text-sm'>{description}</td>
+                <td className='p-4 text-sm'>{method}</td>
+                <td className='p-4 text-sm'>{formatDate(createdAt)}</td>
+                <td className='p-4 text-sm'>pending</td>
+                <td className='p-4 text-sm'>{username}</td>
+                <td className='p-4 text-sm'>-</td>
+
                 <td className='p-4 text-sm'>
-                  <div className='flex items-center gap-2'>
-                    <span className='text-sm'>{amountPaid}</span>
-                  </div>
-                </td>
-                <td className='p-4 text-sm'>
-                  <button className='text-blue-600 hover:text-blue-800'>
+                  <button
+                    onClick={() => handleEdit(payment_id)}
+                    className='text-blue-600 hover:text-blue-800'
+                  >
                     <Pencil className='h-5 w-5' />
                   </button>
                 </td>

@@ -1,12 +1,11 @@
 /** @format */
 
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import axios from "axios";
-import {Base_URL} from "../../../utils/config";
+import axiosInstance from "../../../utils/axiosInstance";
 
 export const login = createAsyncThunk("login", async (data, thunkAPI) => {
   try {
-    const response = await axios.post(`${Base_URL}user/login`, data);
+    const response = await axiosInstance.post(`user/login`, data);
     return response.data;
   } catch (error) {
     return thunkAPI.rejectWithValue({error: error.message});
@@ -18,7 +17,7 @@ export const createUser = createAsyncThunk(
   async (data, thunkAPI) => {
     console.log("data", data);
     try {
-      const response = await axios.post(`${Base_URL}user/createUser`, data);
+      const response = await axiosInstance.post(`user/createUser`, data);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});
@@ -28,7 +27,7 @@ export const createUser = createAsyncThunk(
 
 export const getAllUsers = createAsyncThunk("getAllUsers", async (thunkAPI) => {
   try {
-    const response = await axios.get(`${Base_URL}user/getAllStaffs`);
+    const response = await axiosInstance.get(`user/getAllStaffs`);
     return response.data;
   } catch (error) {
     return thunkAPI.rejectWithValue({error: error.message});
@@ -39,7 +38,7 @@ export const getUserById = createAsyncThunk(
   "getUserById",
   async (id, thunkAPI) => {
     try {
-      const response = await axios.get(`${Base_URL}user/getUserById/${id}`);
+      const response = await axiosInstance.get(`user/getUserById/${id}`);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});
@@ -51,10 +50,7 @@ export const updateUser = createAsyncThunk(
   "updateUser",
   async ({id, data}, thunkAPI) => {
     try {
-      const response = await axios.put(
-        `${Base_URL}user/updateUsers/${id}`,
-        data
-      );
+      const response = await axiosInstance.put(`user/updateUsers/${id}`, data);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});

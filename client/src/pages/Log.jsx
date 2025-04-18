@@ -2,24 +2,28 @@
 
 import React, {useState} from "react";
 import Topbar from "../component/Topbar";
-import PaymentReport from "./PaymentReport";
+import DownloadLogs from "./DownloadLogs";
+import MethodLogs from "./MethodLogs";
 
-const Reports = () => {
-  const [activeTab, setActiveTab] = useState("Payment Report");
+const Log = () => {
+  const [activeTab, setActiveTab] = useState("Download Logs");
 
   const tabs = [
     {
-      label: "Payment Report",
-      content: <PaymentReport setActiveTab={setActiveTab} />,
+      label: "Download Logs",
+      content: <DownloadLogs setActiveTab={setActiveTab} />,
+    },
+    {
+      label: "Method Logs",
+      content: <MethodLogs setActiveTab={setActiveTab} />,
     },
   ];
 
   return (
     <div>
       <div>
-        <Topbar name='Report' />
+        <Topbar name='Logs' />
         <div className='w-full rounded-lg shadow-sm'>
-          {/* Tab Headers */}
           <div className='flex gap-2 border-b px-4 pt-4'>
             {tabs.map((tab) => (
               <button
@@ -46,4 +50,4 @@ const Reports = () => {
   );
 };
 
-export default Reports;
+export default Log;
