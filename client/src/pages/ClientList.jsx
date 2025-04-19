@@ -5,15 +5,17 @@ import {Download, Search, Pencil} from "lucide-react";
 import {useDispatch, useSelector} from "react-redux";
 import {getAllUsers, getUserById} from "../redux/slice/auth.slice";
 import * as XLSX from "xlsx";
-import {allDownloadLog} from "../redux/slice/reports.slice";
+import {getAllClients, getClientById} from "../redux/slice/client.slice";
 
 const TABLE_HEAD = [
   "S.No",
-  "Document Type",
-  "Document Number",
-  "Downloaded By",
-  "Downloaded At",
-  "Role",
+  "Client Name",
+  "Email",
+  "Phone",
+  "Company",
+  "City",
+  "Status",
+  "Actions",
 ];
 
 const getStatusColor = (status) => {
@@ -27,52 +29,37 @@ const getStatusColor = (status) => {
   }
 };
 
-export default function DownloadLogs({setActiveTab}) {
+export default function ClientList({setActiveTab}) {
   const dispatch = useDispatch();
-  const allLogs = useSelector((state) => state.report.downloadLogs);
+  const allClients = useSelector((state) => state.client.allClients);
+  console.log("allClients", allClients);
 
-  const [logs, setLogs] = useState([]);
+  const [clients, setAllClients] = useState([]);
 
   useEffect(() => {
-    dispatch(allDownloadLog());
+    dispatch(getAllClients());
   }, []);
 
   useEffect(() => {
-    if (allLogs?.length > 0) {
-      setLogs(allLogs);
+    if (allClients?.length > 0) {
+      setAllClients(allClients);
     }
-  }, [allLogs]);
+  }, [allClients]);
 
-  console.log("logs", logs);
+  console.log("allClients", allClients);
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter the rows based on the search query
-  const filteredRows = logs?.filter((row) => {
-    const role = (r) => {
-      if (r == 1) return "Admin";
-      if (r == 2) return "Sales";
-      if (r == 3) return "Accounts";
-      return "";
-    };
-
-    const query = searchQuery.toLowerCase();
-
-    return (
-      row?.type?.toLowerCase().includes(query) ||
-      row?.documentNumber?.toLowerCase().includes(query) ||
-      row?.downloaderName?.toLowerCase().includes(query) ||
-      (row?.downloadedAt &&
-        new Date(row.downloadedAt)
-          .toLocaleString()
-          .toLowerCase()
-          .includes(query)) ||
-      role(row?.downloaderRole).toLowerCase().includes(query)
-    );
-  });
+  const filteredRows = clients?.filter(
+    (row) =>
+      row?.client_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row?.client_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row?.client_city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row?.company_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleDownload = () => {
-    if (logs.length === 0) return;
+    if (staffs.length === 0) return;
 
     // Define the fields you want to include in the Excel file
     const exportData = staffs.map(
@@ -94,8 +81,8 @@ export default function DownloadLogs({setActiveTab}) {
 
   const handleEdit = (id) => {
     if (id) {
-      dispatch(getUserById(id));
-      setActiveTab("Create Staff");
+      dispatch(getClientById(id));
+      setActiveTab("Create Client");
     }
   };
 
@@ -141,23 +128,35 @@ export default function DownloadLogs({setActiveTab}) {
 
         <tbody>
           {filteredRows?.map((row, index) => {
-            const role = (role) => {
-              if (role == 1) {
-                return "Admin";
-              } else if (role == 2) {
-                return "Sales";
-              } else if (role == 3) {
-                return "Accounts";
-              }
-            };
             return (
               <tr key={index} className='border-b'>
-                <td className='p-4 text-sm'>{index + 1}</td>
-                <td className='p-4 text-sm'>{row?.type}</td>
-                <td className='p-4 text-sm'>{row?.documentNumber}</td>
-                <td className='p-4 text-sm'>{row?.downloaderName}</td>
-                <td className='p-4 text-sm'>{row?.downloadedAt}</td>
-                <td className='p-4 text-sm'>{role(row?.downloaderRole)}</td>
+                <td className='p-4 flex items-center gap-2'>
+                  <span>{index + 1}</span>
+                </td>
+                <td className='p-4 text-sm'>{row?.client_name}</td>
+                <td className='p-4 text-sm'>{row?.client_email}</td>
+                <td className='p-4 text-sm'>{row?.client_phone}</td>
+                <td className='p-4 text-sm'>{row?.company_name}</td>
+                <td className='p-4 text-sm'>{row?.client_city}</td>
+
+                <td className='p-4 text-sm'>
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
+                      row?.is_active
+                    )}`}
+                  >
+                    {row?.is_active === 1 ? "Active" : "Inactive"}
+                  </span>
+                </td>
+
+                <td className='p-4 text-sm'>
+                  <button
+                    onClick={() => handleEdit(row?.client_id)}
+                    className='text-blue-600 hover:text-blue-800'
+                  >
+                    <Pencil className='h-5 w-5' />
+                  </button>
+                </td>
               </tr>
             );
           })}

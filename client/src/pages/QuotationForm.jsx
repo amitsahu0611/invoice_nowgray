@@ -7,12 +7,28 @@ import InvoiceTemplate3 from "../../template/InvoiceTemplate3";
 import {createQuotation} from "../redux/slice/quotation.slice";
 import {useDispatch, useSelector} from "react-redux";
 import {showSuccess} from "../../utils/config";
+import {getAllClients} from "../redux/slice/client.slice";
 
 const QuotationForm = ({setActiveTab}) => {
   const quotationData = useSelector(
     (state) => state.quotation.singleQuotationData
   );
   console.log("quotationData", quotationData);
+
+  const allClients = useSelector((state) => state.client.allClients);
+  console.log("allClients", allClients);
+
+  const [clients, setAllClients] = useState([]);
+
+  useEffect(() => {
+    dispatch(getAllClients());
+  }, []);
+
+  useEffect(() => {
+    if (allClients?.length > 0) {
+      setAllClients(allClients);
+    }
+  }, [allClients]);
 
   // FormValues logic
   const dispatch = useDispatch();

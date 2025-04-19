@@ -235,6 +235,7 @@ import {
 import {useDispatch, useSelector} from "react-redux";
 import InvoiceTemplate1 from "../../template/InvoiceTemplate1";
 import {getUserData, showError, showSuccess} from "../../utils/config";
+import {createDownloadLog} from "../redux/slice/reports.slice";
 
 const TABLE_HEAD = [
   "Quotation ID",
@@ -311,6 +312,16 @@ export default function QuotationList({setActiveTab}) {
   const handleDownload = (data) => {
     setSelectedInvoice(data); // Set the selected invoice data
     setTriggerDownload(true); // Trigger the download
+    console.log("data", data);
+    const objReq = {
+      documentNumber: data?.quotation_id,
+      downloadedAt: new Date(),
+      downloaderRole: userData.role_id,
+      downloaderName: userData.full_Name,
+      type: "quotation",
+      downloadedBy: userData.user_id,
+    };
+    dispatch(createDownloadLog(objReq));
   };
 
   const handleApprove = async (quote) => {

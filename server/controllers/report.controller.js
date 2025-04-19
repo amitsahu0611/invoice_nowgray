@@ -1,6 +1,8 @@
 /** @format */
 
 const Company = require("../models/Company.model");
+const DownloadLog = require("../models/DownloadLog");
+const Log = require("../models/log.model");
 const Payment = require("../models/Payment.model");
 const Users = require("../models/users.model");
 const {createSuccess} = require("../utils/response");
@@ -60,9 +62,23 @@ const paymentReport = async (req, res) => {
 
 const createDownloadLog = async (req, res) => {
   try {
-    const {type, documentNumber, downloadedBy, downloaderName} = req.body;
+    const {
+      type,
+      documentNumber,
+      downloadedBy,
+      downloaderName,
+      downloaderRole,
+      downloadedAt,
+    } = req.body;
 
-    if (!type || !documentNumber || !downloadedBy || !downloaderName) {
+    // Validate required fields
+    if (
+      !type ||
+      !documentNumber ||
+      !downloadedBy ||
+      !downloaderName ||
+      downloaderRole === undefined
+    ) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
@@ -74,6 +90,8 @@ const createDownloadLog = async (req, res) => {
       documentNumber,
       downloadedBy,
       downloaderName,
+      downloaderRole,
+      downloadedAt, // optional, defaults to NOW if not passed
     });
 
     res.status(201).json({
@@ -90,7 +108,6 @@ const createDownloadLog = async (req, res) => {
   }
 };
 
-// GET - Get all logs
 const getAllDownloadLogs = async (req, res) => {
   try {
     const logs = await DownloadLog.findAll({
@@ -110,8 +127,28 @@ const getAllDownloadLogs = async (req, res) => {
   }
 };
 
+const getAllMethodLogs = async (req, res) => {
+  try {
+    const logs = await Log.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.status(200).json({
+      success: true,
+      data: logs,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve logs",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   paymentReport,
   createDownloadLog,
   getAllDownloadLogs,
+  getAllMethodLogs,
 };

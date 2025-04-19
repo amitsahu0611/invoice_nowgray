@@ -20,11 +20,15 @@ const DownloadLog = sequelize.define(
       allowNull: false,
     },
     downloadedBy: {
-      type: DataTypes.STRING, // or DataTypes.INTEGER if referencing User ID
+      type: DataTypes.INTEGER, // or DataTypes.INTEGER if referencing User ID
       allowNull: false,
     },
     downloaderName: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    downloaderRole: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     downloadedAt: {
@@ -40,7 +44,7 @@ const DownloadLog = sequelize.define(
 module.exports = DownloadLog;
 
 // const syncDb = async () => {
-//   await Invoice.sync({alter: true});
+//   await DownloadLog.sync({alter: true});
 //   console.log("synced");
 // };
 

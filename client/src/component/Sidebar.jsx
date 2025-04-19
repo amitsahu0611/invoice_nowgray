@@ -64,6 +64,14 @@ const Sidebar = () => {
           </Link>
 
           <Link
+            to='/dashboard/client'
+            className='flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg cursor-pointer text-gray-700'
+          >
+            <Users size={20} />
+            Client
+          </Link>
+
+          <Link
             to='/dashboard/reports'
             className='flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg cursor-pointer text-gray-700'
           >

@@ -13,6 +13,7 @@ import DashboardContent from "./DashboardContent";
 import Payments from "./Payments";
 import ApprovePayment from "./ApprovePayment";
 import Log from "./Log";
+import Client from "./Client";
 
 const Dashboard = () => {
   return (
@@ -31,6 +32,7 @@ const Dashboard = () => {
           <Route path='/company' element={<Company />} />
           <Route path='/approvePayment' element={<ApprovePayment />} />
           <Route path='/log' element={<Log />} />
+          <Route path='/client' element={<Client />} />
         </Routes>
       </div>
     </div>

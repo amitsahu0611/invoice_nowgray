@@ -12,6 +12,8 @@ const quotationRouter = require("./routes/quotation.route");
 const invoiceRouter = require("./routes/invoice.route");
 const paymentRouter = require("./routes/payment.route");
 const reportRouter = require("./routes/report.route");
+const clientRouter = require("./routes/client.route");
+
 const logMiddleware = require("./utils/log");
 
 const app = express();
@@ -41,6 +43,7 @@ app.use("/api/quotation", quotationRouter);
 app.use("/api/invoices", invoiceRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/report", reportRouter);
+app.use("/api/client", clientRouter);
 
 app.listen(PORT, () => {
   dbConnection();

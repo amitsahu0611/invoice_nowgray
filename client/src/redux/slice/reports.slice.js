@@ -15,12 +15,53 @@ export const getPaymentReport = createAsyncThunk(
   }
 );
 
+export const allDownloadLog = createAsyncThunk(
+  "allDownloadLog",
+  async (thunkAPI) => {
+    try {
+      const response = await axiosInstance.get(`report/getAllDownloadLogs`);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({error: error.message});
+    }
+  }
+);
+
+export const getAllMethodLogs = createAsyncThunk(
+  "getAllMethodLogs",
+  async (thunkAPI) => {
+    try {
+      const response = await axiosInstance.get(`report/getAllMethodLogs`);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({error: error.message});
+    }
+  }
+);
+
+export const createDownloadLog = createAsyncThunk(
+  "createDownloadLog",
+  async (data, thunkAPI) => {
+    try {
+      const response = await axiosInstance.post(
+        `report/createDownloadLog`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({error: error.message});
+    }
+  }
+);
+
 const reportslice = createSlice({
   name: "reportslice",
   initialState: {
     loading: false,
     error: null,
     paymentReport: [],
+    downloadLogs: [],
+    methodLogs: [],
   },
   reducers: {},
 
@@ -35,6 +76,30 @@ const reportslice = createSlice({
         state.paymentReport = action.payload.result;
       })
       .addCase(getPaymentReport.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(allDownloadLog.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(allDownloadLog.fulfilled, (state, action) => {
+        state.loading = false;
+        state.downloadLogs = action.payload.data;
+      })
+      .addCase(allDownloadLog.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(getAllMethodLogs.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllMethodLogs.fulfilled, (state, action) => {
+        state.loading = false;
+        state.methodLogs = action.payload.data;
+      })
+      .addCase(getAllMethodLogs.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

@@ -5,6 +5,7 @@ const {
   paymentReport,
   createDownloadLog,
   getAllDownloadLogs,
+  getAllMethodLogs,
 } = require("../controllers/report.controller");
 const logMiddleware = require("../utils/log");
 const verifyToken = require("../utils/verifyToken");
@@ -18,5 +19,6 @@ router.get(
   logMiddleware,
   getAllDownloadLogs
 );
+router.get("/getAllMethodLogs", verifyToken, logMiddleware, getAllMethodLogs);
 
 module.exports = router;
