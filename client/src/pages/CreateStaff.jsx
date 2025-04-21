@@ -4,74 +4,99 @@ import React, {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {getAllCompany} from "../redux/slice/company.slice";
 import {showError, showSuccess} from "../../utils/config";
-import {createUser, updateUser} from "../redux/slice/auth.slice";
+import {
+  clearStaffData,
+  createUser,
+  updateUser,
+} from "../redux/slice/auth.slice";
 
 const CreateStaff = ({setActiveTab}) => {
   const dispatch = useDispatch();
   const allCompanies = useSelector((state) => state.company.allCompanies);
   const staffData = useSelector((state) => state.auth.singleStaff);
-
   const [loading, setLoading] = useState(false);
   const [companies, setCompanies] = useState([]);
-  const [update, setUpdate] = useState(false);
   const [staffId, setStaffId] = useState(null);
+
+  console.log("staffData ----- ", staffData);
 
   const [form, setForm] = useState({
     company: "",
     name: "",
     phone: "",
     email: "",
-    role: "",
+    role_id: "",
     password: "",
     status: true,
   });
 
+  console.log("form --------------------- ", form);
+
+  // Set form data for update
   useEffect(() => {
     if (staffData) {
-      setForm((prev) => ({
-        ...prev,
+      console.log("staffData", staffData);
+      setForm({
         company: staffData?.company_id || "",
         name: staffData?.full_Name || "",
         phone: staffData?.mobile || "",
         email: staffData?.email || "",
-        role: staffData?.role_id || "",
+        role_id: staffData?.role_id ?? "",
         password: staffData?.password || "",
         status: staffData?.is_active ?? true,
-      }));
+      });
       setStaffId(staffData?.user_id);
-      setUpdate(true);
     }
   }, [staffData]);
 
+  // Fetch companies on component mount
   useEffect(() => {
     dispatch(getAllCompany());
   }, []);
 
+  // Set companies list after fetching data
   useEffect(() => {
     if (allCompanies?.length > 0) {
       setCompanies(allCompanies);
     }
   }, [allCompanies]);
 
+  // Handle form input changes
   const handleChange = (field, value) => {
     setForm((prev) => ({...prev, [field]: value}));
   };
 
+  // Handle form submission for creating a new staff
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const {company, name, phone, email, role, password} = form;
+    const {company, name, phone, email, role_id, password} = form;
 
+    // Validation checks
     if (!company) return showError("Please select a company.");
     if (!name) return showError("Please enter staff name.");
     if (!phone) return showError("Please enter staff phone number.");
     if (!email) return showError("Please enter staff email.");
-    if (!role) return showError("Please enter staff role.");
+    if (
+      form.role_id === "" ||
+      form.role_id === undefined ||
+      form.role_id === null
+    ) {
+      return showError("Please enter staff role.");
+    }
+
     if (!password) return showError("Please enter staff password.");
 
     setLoading(true);
     try {
-      await dispatch(createUser(form));
-      setActiveTab("Staff List");
+      // If staffId is set, it means we're updating
+      if (staffId) {
+        await handleUpdate();
+      } else {
+        // Create new staff
+        await dispatch(createUser(form));
+        setActiveTab("Staff List");
+        showSuccess("Staff added successfully.");
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -79,8 +104,8 @@ const CreateStaff = ({setActiveTab}) => {
     }
   };
 
-  const handleUpdate = async (e) => {
-    e.preventDefault();
+  // Handle form submission for updating staff data
+  const handleUpdate = async () => {
     const data = await dispatch(
       updateUser({
         id: staffId,
@@ -90,50 +115,51 @@ const CreateStaff = ({setActiveTab}) => {
           email: form?.email,
           password: form?.password,
           mobile: form?.phone,
-          role_id: form?.role,
+          role_id: form?.role_id,
           is_active: form?.status,
         },
       })
     );
 
-    console.log("data", data);
-
-    if (data?.payload?.status == 1) {
-      setForm((prev) => ({
-        ...prev,
+    if (data?.payload?.status === 1) {
+      setForm({
         company: "",
         name: "",
         phone: "",
         email: "",
-        role: "",
+        role_id: null,
         password: "",
         status: true,
-      }));
-      setUpdate(false);
-      setActiveTab("Staff List");
+      });
+      setStaffId(null);
       showSuccess("Staff updated successfully.");
+      setActiveTab("Staff List");
     }
   };
 
-  const handleCancel = async (e) => {
-    e.preventDefault();
-    setForm((prev) => ({
-      ...prev,
+  const resetForm = () => {
+    setForm({
       company: "",
       name: "",
       phone: "",
       email: "",
-      role: "",
+      role_id: null,
       password: "",
       status: true,
-    }));
-    setUpdate(false);
+    });
+    setStaffId(null);
+  };
+
+  const handleCancel = async (e) => {
+    e.preventDefault();
+    resetForm();
+    dispatch(clearStaffData());
   };
 
   return (
     <div className='w-full max-w-8xl mx-auto mt-10 shadow-lg p-8 bg-white rounded-lg'>
       <h2 className='text-2xl font-semibold text-blue-gray-700 mb-6'>
-        {update ? "Update Staff" : "Add New Staff"}
+        {staffData ? "Update Staff" : "Add New Staff"}
       </h2>
 
       <form
@@ -226,15 +252,15 @@ const CreateStaff = ({setActiveTab}) => {
             Staff Role
           </label>
           <select
-            value={form.role}
-            onChange={(e) => handleChange("role", e.target.value)}
+            value={form.role_id}
+            onChange={(e) => handleChange("role_id", e.target.value)}
             required
             className='border border-gray-300 rounded-md px-3 py-2'
           >
             <option value=''>-- Choose Role --</option>
-            <option value='1'>Admin</option>
-            <option value='2'>Account</option>
-            <option value='3'>Sales</option>
+            <option value='0'>Admin</option>
+            <option value='1'>Account</option>
+            <option value='2'>Sales</option>
           </select>
         </div>
 
@@ -267,10 +293,10 @@ const CreateStaff = ({setActiveTab}) => {
         </div>
       </form>
 
-      {/* Submit Button */}
+      {/* Submit Buttons */}
       <div className='pt-6 text-right'>
         <button
-          type='submit'
+          type='button'
           onClick={handleCancel}
           className='bg-gray-600 mr-3 text-white px-6 py-2 rounded-md hover:bg-gray-700'
         >
@@ -278,10 +304,10 @@ const CreateStaff = ({setActiveTab}) => {
         </button>
         <button
           type='submit'
-          onClick={update ? handleUpdate : handleSubmit}
+          onClick={handleSubmit}
           className='bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700'
         >
-          {update ? "Update Staff" : "Add Staff"}
+          {staffData ? "Update Staff" : "Add Staff"}
         </button>
       </div>
     </div>

@@ -1,18 +1,44 @@
 /** @format */
 
+const {Sequelize} = require("sequelize");
 const Invoice = require("../models/Invoice.model");
 const InvoiceItems = require("../models/InvoiceItem.model");
+const Payment = require("../models/Payment.model");
 const {createSuccess} = require("../utils/response");
 
-// Get all invoices
 const getAllInvoices = async (req, res) => {
   try {
     const invoices = await Invoice.findAll();
-    res.status(200).json(invoices);
+
+    const invoicesWithPayments = [];
+
+    for (let invoice of invoices) {
+      const payments = await Payment.findAll({
+        where: {invoiceId: invoice.invoice_id},
+        attributes: [
+          [Sequelize.fn("SUM", Sequelize.col("amountPaid")), "totalPaid"],
+        ],
+        raw: true,
+      });
+
+      const totalPaid = payments[0] ? payments[0].totalPaid : 0;
+
+      invoicesWithPayments.push({
+        ...invoice.dataValues,
+        totalPaid,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: invoicesWithPayments,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({error: "Failed to fetch invoices", details: error.message});
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch invoices with payment data",
+      error: error.message,
+    });
   }
 };
 
@@ -55,6 +81,58 @@ const getInvoiceById = async (req, res) => {
       .json({error: "Failed to fetch invoice", details: error.message});
   }
 };
+
+// const getInvoiceById = async (req, res) => {
+//   try {
+//     const invoice = await Invoice.findByPk(req.params.invoiceId);
+
+//     if (!invoice) {
+//       return res.status(404).json({error: "Invoice not found"});
+//     }
+
+//     const invoiceItems = await InvoiceItems.findAll({
+//       where: {invoice_id: req.params.invoiceId},
+//     });
+
+//     const payments = await Payment.findAll({
+//       where: {invoiceId: req.params.invoiceId},
+//       attributes: [
+//         [Sequelize.fn("SUM", Sequelize.col("amountPaid")), "totalPaid"],
+//       ],
+//       raw: true,
+//     });
+
+//     const totalPaid = payments[0] ? payments[0].totalPaid : 0;
+
+//     invoice.dataValues.invoice_items = invoiceItems.map((item) => {
+//       const {
+//         item_id,
+//         invoice_id,
+//         description,
+//         month,
+//         monthly_price,
+//         total_price,
+//       } = item.dataValues;
+//       return {
+//         item_id,
+//         invoice_id,
+//         description,
+//         month,
+//         monthly_price,
+//         total_price,
+//       };
+//     });
+
+//     invoice.dataValues.totalPaid = totalPaid;
+
+//     res.status(200).json(invoice);
+//   } catch (error) {
+//     console.error("Error fetching invoice:", error);
+//     res
+//       .status(500)
+//       .json({error: "Failed to fetch invoice", details: error.message});
+//   }
+// };
 
 const updateInvoice = async (req, res) => {
   try {

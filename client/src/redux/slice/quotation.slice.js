@@ -3,14 +3,16 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {Base_URL, getUserData} from "../../../utils/config";
 import axiosInstance from "../../../utils/axiosInstance";
+import axios from "axios";
 
 export const createQuotation = createAsyncThunk(
   "createQuotation",
   async (data, thunkAPI) => {
     const userData = await getUserData();
-
-    data.companyId = userData.companyId || userData.company._id;
+    console.log("userData", userData);
+    data.company_id = userData.company_id;
     data.salesPersonId = userData.user_id;
+    console.log("yaha aaya");
 
     try {
       const response = await axiosInstance.post(

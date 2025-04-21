@@ -52,7 +52,7 @@ const getRoleIdFromRoleName = (role) => {
     account: 2,
     sales: 3,
   };
-  return roleMap[role.toLowerCase()] || 0; // Default to 0 if not matched
+  return roleMap[role] || 0; // Default to 0 if not matched
 };
 
 const createUser = async (req, res) => {

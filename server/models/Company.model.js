@@ -24,6 +24,10 @@ const Company = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    company_prefix: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     company_phone: {
       type: DataTypes.STRING,
       allowNull: true,

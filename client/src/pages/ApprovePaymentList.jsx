@@ -14,7 +14,7 @@ const TABLE_HEAD = [
   "Amount Paid",
   "Method",
   "Payment Date",
-  "Created By",
+  "Payment Created By",
   "Actions",
 ];
 

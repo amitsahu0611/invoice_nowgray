@@ -61,7 +61,7 @@ const invoiceSlice = createSlice({
       })
       .addCase(getAllInvoices.fulfilled, (state, action) => {
         state.loading = false;
-        state.allInvoices = action.payload;
+        state.allInvoices = action.payload.data;
       })
       .addCase(getAllInvoices.rejected, (state, action) => {
         state.loading = false;

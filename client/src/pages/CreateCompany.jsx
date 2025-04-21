@@ -13,6 +13,7 @@ const CreateCompany = ({setActiveTab}) => {
   const dispatch = useDispatch();
 
   const [form, setForm] = useState({
+    prefix: "",
     name: "",
     email: "",
     color: "#000000", // Default color
@@ -30,6 +31,7 @@ const CreateCompany = ({setActiveTab}) => {
     if (companyData) {
       setForm((prev) => ({
         ...prev,
+        prefix: companyData?.prefix || "",
         name: companyData?.company_name || "",
         email: companyData?.company_email || "",
         phone: companyData?.company_phone || "",
@@ -50,7 +52,7 @@ const CreateCompany = ({setActiveTab}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const {name, email, phone, address, website} = form;
+    const {name, email, phone, address, website, prefix} = form;
     console.log("form", form);
     if (name && email && phone && address && website) {
       const result = await dispatch(createCompany(form));
@@ -75,6 +77,7 @@ const CreateCompany = ({setActiveTab}) => {
 
   const handleCancel = () => {
     setForm({
+      prefix: "",
       name: "",
       email: "",
       color: "#000000",
@@ -104,6 +107,20 @@ const CreateCompany = ({setActiveTab}) => {
             placeholder='Enter Company Name'
             value={form.name}
             onChange={(e) => handleChange("name", e.target.value)}
+            required
+            className='border border-gray-300 rounded-md px-3 py-2'
+          />
+        </div>
+
+        <div className='flex flex-col'>
+          <label className='mb-1 text-sm font-medium text-gray-700'>
+            Prefix
+          </label>
+          <input
+            type='text'
+            placeholder='Enter Company Prefix'
+            value={form.name}
+            onChange={(e) => handleChange("prefix", e.target.value)}
             required
             className='border border-gray-300 rounded-md px-3 py-2'
           />

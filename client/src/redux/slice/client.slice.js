@@ -64,7 +64,11 @@ const clientslice = createSlice({
     loading: false,
     error: null,
   },
-  reducers: {},
+  reducers: {
+    clearClientData: (state) => {
+      state.singleClient = null;
+    },
+  },
 
   extraReducers: (builder) => {
     builder
@@ -97,3 +101,4 @@ const clientslice = createSlice({
 
 // Export the reducer and actions
 export default clientslice.reducer;
+export const {clearClientData} = clientslice.actions;

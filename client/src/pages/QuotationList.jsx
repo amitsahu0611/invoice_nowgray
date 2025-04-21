@@ -1,18 +1,16 @@
 /** @format */
 
-// /** @format */
-
 // import React, {useEffect, useState} from "react";
 // import {Download, Search, Pencil, Eye} from "lucide-react";
 // import {
 //   approveQuotation,
 //   getAllQuotations,
 //   getQuotationById,
-//   updateQuotation,
 // } from "../redux/slice/quotation.slice";
 // import {useDispatch, useSelector} from "react-redux";
 // import InvoiceTemplate1 from "../../template/InvoiceTemplate1";
 // import {getUserData, showError, showSuccess} from "../../utils/config";
+// import {createDownloadLog} from "../redux/slice/reports.slice";
 
 // const TABLE_HEAD = [
 //   "Quotation ID",
@@ -44,17 +42,14 @@
 // export default function QuotationList({setActiveTab}) {
 //   const dispatch = useDispatch();
 //   const [searchQuery, setSearchQuery] = useState("");
-//   const [loading, setLoading] = useState(false);
 //   const [quotations, setAllQuotations] = useState([]);
 //   const [userData, setUserData] = useState({});
-//   const [showInvoice, setShowInvoice] = useState(false);
 //   const [selectedInvoice, setSelectedInvoice] = useState(null);
 //   const [triggerDownload, setTriggerDownload] = useState(false);
 
 //   useEffect(() => {
 //     const fetchData = async () => {
 //       const data = await getUserData();
-//       console.log("data", data);
 //       setUserData(data);
 //     };
 
@@ -62,7 +57,6 @@
 //   }, []);
 
 //   const allQuotations = useSelector((state) => state.quotation.allQuotations);
-//   console.log("quotations", quotations);
 
 //   useEffect(() => {
 //     dispatch(getAllQuotations());
@@ -91,7 +85,18 @@
 //   };
 
 //   const handleDownload = (data) => {
-//     <InvoiceTemplate1 invoiceData={data} download={true} />;
+//     setSelectedInvoice(data); // Set the selected invoice data
+//     setTriggerDownload(true); // Trigger the download
+//     console.log("data", data);
+//     const objReq = {
+//       documentNumber: data?.quotation_id,
+//       downloadedAt: new Date(),
+//       downloaderRole: userData.role_id,
+//       downloaderName: userData.full_Name,
+//       type: "quotation",
+//       downloadedBy: userData.user_id,
+//     };
+//     dispatch(createDownloadLog(objReq));
 //   };
 
 //   const handleApprove = async (quote) => {
@@ -220,13 +225,19 @@
 //           ))}
 //         </tbody>
 //       </table>
+
+//       {triggerDownload && selectedInvoice && (
+//         <InvoiceTemplate1
+//           invoiceData={selectedInvoice}
+//           download={triggerDownload}
+//         />
+//       )}
 //     </div>
 //   );
 // }
-/** @format */
 
 import React, {useEffect, useState} from "react";
-import {Download, Search, Pencil, Eye} from "lucide-react";
+import {Download, Search, Eye} from "lucide-react";
 import {
   approveQuotation,
   getAllQuotations,
@@ -264,20 +275,20 @@ const getStatusColor = (status) => {
   }
 };
 
-export default function QuotationList({setActiveTab}) {
+export default function QuotationList() {
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
   const [quotations, setAllQuotations] = useState([]);
   const [userData, setUserData] = useState({});
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [triggerDownload, setTriggerDownload] = useState(false);
+  const [showModal, setShowModal] = useState(false); // ✅ new state for modal
 
   useEffect(() => {
     const fetchData = async () => {
       const data = await getUserData();
       setUserData(data);
     };
-
     fetchData();
   }, []);
 
@@ -293,7 +304,6 @@ export default function QuotationList({setActiveTab}) {
     }
   }, [allQuotations]);
 
-  // Filter the rows based on the search query
   const filteredRows = quotations?.filter(
     (row) =>
       row?.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -304,15 +314,14 @@ export default function QuotationList({setActiveTab}) {
       row?.total_amount.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleView = (id) => {
-    dispatch(getQuotationById(id));
-    setActiveTab("Create Quotation");
+  const handleView = (invoice) => {
+    setSelectedInvoice(invoice); // ✅ set invoice data
+    setShowModal(true); // ✅ open modal
   };
 
   const handleDownload = (data) => {
-    setSelectedInvoice(data); // Set the selected invoice data
-    setTriggerDownload(true); // Trigger the download
-    console.log("data", data);
+    setSelectedInvoice(data);
+    setTriggerDownload(true);
     const objReq = {
       documentNumber: data?.quotation_id,
       downloadedAt: new Date(),
@@ -369,21 +378,15 @@ export default function QuotationList({setActiveTab}) {
   return (
     <div className='overflow-hidden rounded-lg border bg-white shadow-md'>
       <div className='flex items-center justify-between p-4 border-b'>
-        <div>
-          <h2 className='text-lg font-semibold text-gray-700'>
-            Quotation List
-          </h2>
-        </div>
+        <h2 className='text-lg font-semibold text-gray-700'>Quotation List</h2>
         <div className='flex items-center gap-4'>
-          <div className='w-72'>
-            <input
-              type='text'
-              className='w-full p-2 border border-gray-300 rounded-md'
-              placeholder='Search'
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <input
+            type='text'
+            className='w-72 p-2 border border-gray-300 rounded-md'
+            placeholder='Search'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
           <button className='flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-blue-600 border-blue-600 hover:bg-blue-100'>
             <Download className='w-4 h-4' />
             Download
@@ -404,7 +407,6 @@ export default function QuotationList({setActiveTab}) {
             ))}
           </tr>
         </thead>
-
         <tbody>
           {filteredRows?.map((quote, index) => (
             <tr key={index} className='border-b'>
@@ -434,7 +436,7 @@ export default function QuotationList({setActiveTab}) {
               </td>
               <td className='p-4 text-sm'>
                 <button
-                  onClick={() => handleView(quote?.quotation_id)}
+                  onClick={() => handleView(quote)}
                   className='text-blue-600 hover:text-blue-800'
                 >
                   <Eye className='h-5 w-5' />
@@ -451,6 +453,42 @@ export default function QuotationList({setActiveTab}) {
         </tbody>
       </table>
 
+      {/* ✅ Modal for viewing Invoice */}
+      {showModal && selectedInvoice && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+          <div className='relative bg-white rounded-lg shadow-lg w-[830px] max-h-[90vh] overflow-hidden'>
+            {/* Close Button */}
+            <button
+              onClick={() => setShowModal(false)}
+              className='absolute top-2 right-2 text-gray-600 hover:text-red-500 text-xl font-bold z-10'
+            >
+              ×
+            </button>
+
+            {/* Scrollable content area */}
+            <div className='overflow-y-auto p-6' style={{maxHeight: "90vh"}}>
+              {/* Fixed A4 size content box */}
+              <div
+                className='mx-auto'
+                style={{
+                  width: "798px",
+                  height: "1123px", // A4 size at 96 DPI
+                  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                  backgroundColor: "white",
+                  padding: "20px",
+                }}
+              >
+                <InvoiceTemplate1
+                  invoiceData={selectedInvoice}
+                  download={false}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ For downloading as before */}
       {triggerDownload && selectedInvoice && (
         <InvoiceTemplate1
           invoiceData={selectedInvoice}

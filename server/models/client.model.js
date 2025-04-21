@@ -17,7 +17,7 @@ const Client = sequelize.define(
       allowNull: false,
     },
     pan_number: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     client_gst: {

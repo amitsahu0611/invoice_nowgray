@@ -67,7 +67,11 @@ const authSlice = createSlice({
     loading: false,
     error: null,
   },
-  reducers: {},
+  reducers: {
+    clearStaffData: (state) => {
+      state.singleStaff = null;
+    },
+  },
 
   extraReducers: (builder) => {
     builder
@@ -100,3 +104,4 @@ const authSlice = createSlice({
 
 // Export the reducer and actions
 export default authSlice.reducer;
+export const {clearStaffData} = authSlice.actions;

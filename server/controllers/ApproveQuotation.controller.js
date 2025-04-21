@@ -19,18 +19,16 @@ const approvedQuotation = async (req, res) => {
       });
     }
 
-    // Update quotation with incoming data
     await quotation.update(req.body);
 
     let newInvoice = null;
 
     if (req.body.approvedStatus === "approved") {
-      // Generate a new invoice_no (you can change this logic)
       const invoiceCount = await Invoice.count();
-      const newInvoiceNo = `INV-${invoiceCount + 1}`; // e.g., INV-101
+      const newInvoiceNo = quotation?.invoice_no;
 
-      // Create invoice using quotation data
       newInvoice = await Invoice.create({
+        client_id: quotation?.client_id || null,
         quotation_id: quotation.quotation_id,
         salesPersonId: quotation.salesPersonId,
         company_id: quotation.company_id,

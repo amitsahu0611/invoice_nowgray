@@ -5,7 +5,11 @@ import {useDispatch, useSelector} from "react-redux";
 import {getAllCompany} from "../redux/slice/company.slice";
 import {showError, showSuccess} from "../../utils/config";
 import {createUser, updateUser} from "../redux/slice/auth.slice";
-import {createClient, updateClient} from "../redux/slice/client.slice";
+import {
+  clearClientData,
+  createClient,
+  updateClient,
+} from "../redux/slice/client.slice";
 
 const ClientCreation = ({setActiveTab}) => {
   const dispatch = useDispatch();
@@ -158,6 +162,7 @@ const ClientCreation = ({setActiveTab}) => {
       client_house_no: "",
       is_active: true,
     }));
+    dispatch(clearClientData());
   };
 
   return (
@@ -368,10 +373,10 @@ const ClientCreation = ({setActiveTab}) => {
         </button>
         <button
           type='submit'
-          onClick={update ? handleUpdate : handleSubmit}
+          onClick={handleSubmit}
           className='bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700'
         >
-          {update ? "Update Client" : "Add Client"}
+          Add Client
         </button>
       </div>
     </div>

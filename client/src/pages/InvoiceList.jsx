@@ -15,6 +15,7 @@ import {getAllInvoices, getInvoiceById} from "../redux/slice/invoice.slice";
 
 const TABLE_HEAD = [
   "Invoice ID",
+  "Invoice No",
   "Customer Name",
   "Phone",
   "Email",
@@ -174,6 +175,7 @@ export default function InvoiceList({setActiveTab}) {
           {filteredRows?.map((quote, index) => (
             <tr key={index} className='border-b'>
               <td className='p-4 text-sm'>{index + 1}</td>
+              <td className='p-4 text-sm'>{quote?.invoice_no}</td>
               <td className='p-4 text-sm'>{quote?.customer_name}</td>
               <td className='p-4 text-sm'>{quote?.customer_phone}</td>
               <td className='p-4 text-sm'>{quote?.customerEmail}</td>
@@ -184,12 +186,12 @@ export default function InvoiceList({setActiveTab}) {
               <td className='p-4 text-sm'>{formatDate(quote?.approvedDate)}</td>
               <td className='p-4 text-sm'>{quote?.discountValue || "-"}</td>
               <td className='p-4 text-sm'>
-                <button
+                {/* <button
                   onClick={() => handleView(quote?.invoice_id)}
                   className='text-blue-600 hover:text-blue-800'
                 >
                   <Pencil className='h-5 w-5 mr-3' />
-                </button>
+                </button> */}
                 <button
                   onClick={() => handleView(quote?.quotation_id)}
                   className='text-blue-600 hover:text-blue-800'

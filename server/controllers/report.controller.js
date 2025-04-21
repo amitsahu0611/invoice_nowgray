@@ -1,7 +1,10 @@
 /** @format */
 
+const {Op} = require("sequelize");
+const Client = require("../models/client.model");
 const Company = require("../models/Company.model");
 const DownloadLog = require("../models/DownloadLog");
+const Invoice = require("../models/Invoice.model");
 const Log = require("../models/log.model");
 const Payment = require("../models/Payment.model");
 const Users = require("../models/users.model");
@@ -146,9 +149,90 @@ const getAllMethodLogs = async (req, res) => {
   }
 };
 
+const reportByCustomer = async (req, res) => {
+  try {
+    const clients = await Client.findAll({
+      where: {is_deleted: false},
+      raw: true,
+    });
+
+    const report = [];
+
+    for (const client of clients) {
+      const invoices = await Invoice.findAll({
+        where: {client_id: client.client_id},
+        raw: true,
+      });
+
+      let totalInvoiceAmount = 0;
+      let totalPaid = 0;
+
+      const invoiceDetails = [];
+
+      for (const invoice of invoices) {
+        const invoiceAmount = parseFloat(invoice.total_amount || 0);
+        totalInvoiceAmount += invoiceAmount;
+
+        const payments = await Payment.findAll({
+          where: {
+            invoiceId: invoice.invoice_id,
+            approvedBy: {
+              [Op.and]: {
+                [Op.ne]: null,
+                [Op.ne]: "",
+              },
+            },
+          },
+          raw: true,
+        });
+
+        const paidAmount = payments.reduce(
+          (sum, p) => sum + parseFloat(p.amountPaid || 0),
+          0
+        );
+        totalPaid += paidAmount;
+
+        invoiceDetails.push({
+          invoice_id: invoice.invoice_id,
+          invoice_no: invoice.invoice_no,
+          issue_date: invoice.issue_date,
+          total_amount: invoiceAmount,
+          paid: paidAmount,
+          balance: invoiceAmount - paidAmount,
+          payments: payments.map((p) => ({
+            payment_id: p.payment_id,
+            amountPaid: parseFloat(p.amountPaid),
+            method: p.method,
+            description: p.description,
+            createdAt: p.createdAt,
+          })),
+        });
+      }
+
+      report.push({
+        client_id: client.client_id,
+        client_name: client.client_name,
+        client_email: client.client_email,
+        client_phone: client.client_phone,
+        total_invoices: invoices.length,
+        total_invoice_amount: totalInvoiceAmount,
+        total_paid: totalPaid,
+        total_due: totalInvoiceAmount - totalPaid,
+        invoices: invoiceDetails,
+      });
+    }
+
+    res.json({success: true, data: report});
+  } catch (error) {
+    console.error("Error generating report:", error);
+    res.status(500).json({success: false, message: "Server error"});
+  }
+};
+
 module.exports = {
   paymentReport,
   createDownloadLog,
   getAllDownloadLogs,
   getAllMethodLogs,
+  reportByCustomer,
 };

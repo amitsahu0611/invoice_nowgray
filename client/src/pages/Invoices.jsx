@@ -6,13 +6,9 @@ import InvoiceForm from "./InvoiceForm";
 import InvoiceList from "./InvoiceList";
 
 const Invoices = () => {
-  const [activeTab, setActiveTab] = useState("Edit Invoices");
+  const [activeTab, setActiveTab] = useState("Invoice List");
 
   const tabs = [
-    {
-      label: "Edit Invoices",
-      content: <InvoiceForm setActiveTab={setActiveTab} />,
-    },
     {
       label: "Invoice List",
       content: <InvoiceList setActiveTab={setActiveTab} />,

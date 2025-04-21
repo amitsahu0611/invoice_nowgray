@@ -3,14 +3,19 @@
 import React, {useState} from "react";
 import Topbar from "../component/Topbar";
 import PaymentReport from "./PaymentReport";
+import ClientReport from "./ClientReport";
 
 const Reports = () => {
-  const [activeTab, setActiveTab] = useState("Payment Report");
+  const [activeTab, setActiveTab] = useState("Invoices Report");
 
   const tabs = [
     {
-      label: "Payment Report",
+      label: "Invoices Report",
       content: <PaymentReport setActiveTab={setActiveTab} />,
+    },
+    {
+      label: "Report by client",
+      content: <ClientReport setActiveTab={setActiveTab} />,
     },
   ];
 

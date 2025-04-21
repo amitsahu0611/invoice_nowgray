@@ -11,6 +11,7 @@ const TABLE_HEAD = [
   "Company Name",
   "Phone",
   "Email",
+  "Role",
   "Status",
   "Actions",
 ];
@@ -131,7 +132,8 @@ export default function StaffList({setActiveTab}) {
               full_Name,
               is_active,
               mobile,
-              company_id,
+              user_id,
+              role_id,
             } = row;
             console.log("is_active", is_active);
             return (
@@ -142,6 +144,16 @@ export default function StaffList({setActiveTab}) {
                 <td className='p-4 text-sm'>{company_name}</td>
                 <td className='p-4 text-sm'>{mobile}</td>
                 <td className='p-4 text-sm'>{email}</td>
+                <td className='p-4 text-sm'>
+                  {role_id === 0
+                    ? "Admin"
+                    : role_id === 1
+                    ? "Account"
+                    : role_id === 2
+                    ? "Sales"
+                    : ""}
+                </td>
+
                 <td className='p-4 text-sm'>
                   <span
                     className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
@@ -154,7 +166,7 @@ export default function StaffList({setActiveTab}) {
 
                 <td className='p-4 text-sm'>
                   <button
-                    onClick={() => handleEdit(company_id)}
+                    onClick={() => handleEdit(user_id)}
                     className='text-blue-600 hover:text-blue-800'
                   >
                     <Pencil className='h-5 w-5' />

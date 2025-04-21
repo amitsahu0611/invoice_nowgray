@@ -6,19 +6,33 @@ import InvoiceTemplate2 from "../../template/InvoiceTemplate2";
 import InvoiceTemplate3 from "../../template/InvoiceTemplate3";
 import {createQuotation} from "../redux/slice/quotation.slice";
 import {useDispatch, useSelector} from "react-redux";
-import {showSuccess} from "../../utils/config";
+import {getUserData, showSuccess} from "../../utils/config";
 import {getAllClients} from "../redux/slice/client.slice";
 
 const QuotationForm = ({setActiveTab}) => {
   const quotationData = useSelector(
     (state) => state.quotation.singleQuotationData
   );
+
+  const [userData, setUserData] = useState({});
+
+  console.log("userData", userData);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getUserData();
+      console.log("data", data);
+      setUserData(data);
+    };
+
+    fetchData();
+  }, []);
   console.log("quotationData", quotationData);
 
   const allClients = useSelector((state) => state.client.allClients);
-  console.log("allClients", allClients);
 
   const [clients, setAllClients] = useState([]);
+  console.log("clients", clients);
 
   useEffect(() => {
     dispatch(getAllClients());
@@ -33,7 +47,9 @@ const QuotationForm = ({setActiveTab}) => {
   // FormValues logic
   const dispatch = useDispatch();
   const [updated, setUpdated] = useState(false);
+  const [prefix, setPrefix] = useState("");
   const [formValues, setFormValues] = useState({
+    client_id: null,
     category: "Design Services",
     invoice_no: "NG00906",
     issue_date: "2025-03-26",
@@ -99,6 +115,7 @@ const QuotationForm = ({setActiveTab}) => {
         discountValue: quotationData.discountValue || "",
         termsAndConditions: quotationData.termsAndConditions || "",
         notes: quotationData.notes || "",
+        client_id: quotationData?.client_id || null,
         items:
           quotationData.items?.map((item) => ({
             description: item.description || "",
@@ -122,7 +139,6 @@ const QuotationForm = ({setActiveTab}) => {
 
   const calculateTotals = () => {
     let totalAmount = 0;
-
     formValues.items.forEach((item) => {
       const month = parseFloat(item.month) || 0;
       const monthlyPrice = parseFloat(item.monthly_price) || 0;
@@ -161,6 +177,59 @@ const QuotationForm = ({setActiveTab}) => {
     setFormValues((prev) => ({...prev, [name]: value}));
   };
 
+  console.log("prefix", prefix);
+
+  useEffect(() => {
+    if (prefix) {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      const newInvoiceNumber = `${prefix}/${
+        userData?.user_id
+      }/${year}/${month}/${randomNum.toString().padStart(4, "0")}`;
+      console.log("newInvoiceNumber", newInvoiceNumber);
+      setFormValues((prev) => ({
+        ...prev,
+        invoice_no: newInvoiceNumber,
+      }));
+    }
+  }, [prefix]);
+
+  const handleClient = (e) => {
+    const selectedId = parseInt(e.target.value); // Get selected client_id
+    const selectedClient = clients.find(
+      (client) => client.client_id === selectedId
+    );
+    console.log("Selected Client:", selectedClient);
+
+    if (selectedClient) {
+      setFormValues((prev) => ({
+        ...formValues,
+        client_id: selectedClient?.client_id || null,
+        customer_name: selectedClient?.client_name || "-",
+        customer_company: selectedClient?.company_name || "-",
+        customer_gst: selectedClient?.client_gst || "-",
+        customer_phone: selectedClient?.client_phone || "-",
+        customerEmail: selectedClient?.client_email || "-",
+        pannumber: selectedClient?.pan_number || "-",
+        pancode: selectedClient?.pan_code || "-",
+        houseNo: selectedClient?.client_house_no || "-",
+        roadStreet: selectedClient?.client_street || "-",
+        city: selectedClient?.client_gst || "-",
+        district: selectedClient?.client_district || "-",
+      }));
+      setPrefix(selectedClient?.company_prefix);
+    }
+
+    // // If you're updating state
+    // setFormValues((prev) => ({
+    //   ...prev,
+    //   company_id: selectedId, // or selectedClient.company_id
+    //   clientDetails: selectedClient, // if you want to keep the full object
+    // }));
+  };
+
   const handleItemChange = (index, e) => {
     const {name, value} = e.target;
     const updatedItems = [...formValues.items];
@@ -196,6 +265,7 @@ const QuotationForm = ({setActiveTab}) => {
   const handleClear = (e) => {
     e.preventDefault();
     setFormValues({
+      client_id: null,
       category: "",
       invoice_no: "",
       issue_date: "",
@@ -270,6 +340,15 @@ const QuotationForm = ({setActiveTab}) => {
     }
   };
 
+  useEffect(() => {
+    const today = new Date();
+    const formattedDate = today.toISOString().split("T")[0]; // Format date as YYYY-MM-DD
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      issue_date: formattedDate,
+    }));
+  }, []);
+
   return (
     <div className='p-8 max-w-8xl mx-auto bg-white rounded-lg shadow-lg'>
       <form onSubmit={handleSubmit}>
@@ -277,7 +356,7 @@ const QuotationForm = ({setActiveTab}) => {
         <div className='mb-6'>
           <h4 className='font-semibold text-xl mb-4'>Client Details</h4>
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-            <div>
+            {/* <div>
               <label className='block mb-1'>Customer Name</label>
               <input
                 name='customer_name'
@@ -286,6 +365,24 @@ const QuotationForm = ({setActiveTab}) => {
                 placeholder='Customer Name'
                 className='border border-gray-300 rounded-md p-2 w-full'
               />
+            </div> */}
+            <div className='flex flex-col'>
+              <label className='mb-1 text-sm font-medium text-gray-700'>
+                Select Client
+              </label>
+              <select
+                value={formValues.company_id}
+                onChange={handleClient}
+                required
+                className='border border-gray-300 rounded-md px-3 py-2'
+              >
+                <option value=''>-- Select Client --</option>
+                {clients.map((client) => (
+                  <option key={client?.client_id} value={client?.client_id}>
+                    {client?.client_name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className='block mb-1'>Company</label>
@@ -293,7 +390,8 @@ const QuotationForm = ({setActiveTab}) => {
                 name='customer_company'
                 value={formValues.customer_company}
                 onChange={handleChange}
-                placeholder='Company'
+                placeholder='Customer Company'
+                disabled
                 className='border border-gray-300 rounded-md p-2 w-full'
               />
             </div>
@@ -304,6 +402,7 @@ const QuotationForm = ({setActiveTab}) => {
                 value={formValues.customer_phone}
                 onChange={handleChange}
                 placeholder='Phone'
+                disabled
                 className='border border-gray-300 rounded-md p-2 w-full'
               />
             </div>
@@ -314,6 +413,7 @@ const QuotationForm = ({setActiveTab}) => {
                 value={formValues.customerEmail}
                 onChange={handleChange}
                 placeholder='Email'
+                disabled
                 className='border border-gray-300 rounded-md p-2 w-full'
               />
             </div>
@@ -323,6 +423,7 @@ const QuotationForm = ({setActiveTab}) => {
                 name='customer_gst'
                 value={formValues.customer_gst}
                 onChange={handleChange}
+                disabled
                 placeholder='GST Number'
                 className='border border-gray-300 rounded-md p-2 w-full'
               />
@@ -333,6 +434,7 @@ const QuotationForm = ({setActiveTab}) => {
                 name='pannumber'
                 value={formValues.pannumber}
                 onChange={handleChange}
+                disabled
                 placeholder='PAN Number'
                 className='border border-gray-300 rounded-md p-2 w-full'
               />
@@ -343,6 +445,7 @@ const QuotationForm = ({setActiveTab}) => {
                 name='pancode'
                 value={formValues.pancode}
                 onChange={handleChange}
+                disabled
                 placeholder='PAN Code'
                 className='border border-gray-300 rounded-md p-2 w-full'
               />
@@ -375,15 +478,15 @@ const QuotationForm = ({setActiveTab}) => {
         </div>
         {/* Invoice Info */}
         <div className='mb-6'>
-          <h4 className='font-semibold text-xl mb-4'>Invoice Info</h4>
+          <h4 className='font-semibold text-xl mb-4'>Quotation Info</h4>
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             <div>
-              <label className='block mb-1'>Invoice No.</label>
+              <label className='block mb-1'>Quotation No.</label>
               <input
                 name='invoice_no'
                 value={formValues.invoice_no}
                 onChange={handleChange}
-                placeholder='Invoice No.'
+                placeholder='Quotation No.'
                 className='border border-gray-300 rounded-md p-2 w-full'
               />
             </div>
@@ -683,17 +786,17 @@ const QuotationForm = ({setActiveTab}) => {
             Clear
           </button>
         </div>
-        {!updated && (
-          <div className='flex justify-end mt-5'>
-            <button
-              type='submit'
-              onClick={handleSubmit}
-              className='bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200'
-            >
-              Submit
-            </button>
-          </div>
-        )}
+        {/* {!updated && ( */}
+        <div className='flex justify-end mt-5'>
+          <button
+            type='submit'
+            onClick={handleSubmit}
+            className='bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200'
+          >
+            Submit
+          </button>
+        </div>
+        {/* )} */}
       </div>
     </div>
   );

@@ -19,6 +19,10 @@ const Payment = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    client_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     companyId: {
       type: DataTypes.INTEGER,
       allowNull: false,

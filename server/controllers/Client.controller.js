@@ -46,16 +46,20 @@ const getAllClients = async (req, res) => {
       raw: true,
     });
 
-    // Create a lookup object for faster access
+    // Create a lookup object for faster access with both company_name and company_prefix
     const companyMap = {};
     companies.forEach((company) => {
-      companyMap[company.company_id] = company.company_name;
+      companyMap[company.company_id] = {
+        company_name: company.company_name,
+        company_prefix: company.company_prefix,
+      };
     });
 
-    // Add company_name to each client
+    // Add company_name and company_prefix to each client
     const clientsWithCompany = clients.map((client) => ({
       ...client,
-      company_name: companyMap[client.company_id] || null,
+      company_name: companyMap[client.company_id]?.company_name || null,
+      company_prefix: companyMap[client.company_id]?.company_prefix || null,
     }));
 
     res.status(200).json({

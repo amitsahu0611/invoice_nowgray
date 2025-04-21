@@ -239,6 +239,7 @@ import html2canvas from "html2canvas";
 import {forImage, showSuccess} from "../utils/config";
 
 const InvoiceTemplate1 = ({invoiceData, download}) => {
+  console.log("invoiceData", invoiceData);
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const options = {year: "numeric", month: "long", day: "numeric"};
@@ -289,6 +290,19 @@ const InvoiceTemplate1 = ({invoiceData, download}) => {
               <br />
               GSTIN: 07AAKCC6957N1ZM
             </div>
+          </div>
+
+          <div className='flex justify-center items-center'>
+            <img
+              src='http://localhost:5173/logo/ecomm.png' // replace with your image path
+              alt='Ecomm11 Logo'
+              style={{
+                height: "150px",
+                borderRadius: "8px", // Rounded corners for the image
+                padding: "10px", // Space between image and border
+              }}
+              className='w-32 h-auto' // adjust the size of the image as needed
+            />
           </div>
         </div>
 

@@ -39,6 +39,18 @@ export const getAllMethodLogs = createAsyncThunk(
   }
 );
 
+export const reportByCustomer = createAsyncThunk(
+  "reportByCustomer",
+  async (thunkAPI) => {
+    try {
+      const response = await axiosInstance.get(`report/reportByCustomer`);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({error: error.message});
+    }
+  }
+);
+
 export const createDownloadLog = createAsyncThunk(
   "createDownloadLog",
   async (data, thunkAPI) => {
@@ -60,6 +72,7 @@ const reportslice = createSlice({
     loading: false,
     error: null,
     paymentReport: [],
+    reportsByClient: [],
     downloadLogs: [],
     methodLogs: [],
   },
@@ -100,6 +113,19 @@ const reportslice = createSlice({
         state.methodLogs = action.payload.data;
       })
       .addCase(getAllMethodLogs.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(reportByCustomer.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(reportByCustomer.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log("action.payload", action.payload);
+        state.reportsByClient = action.payload.data;
+      })
+      .addCase(reportByCustomer.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

@@ -59,6 +59,10 @@ const Quotation = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    client_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     customerEmail: {
       type: DataTypes.STRING,
       allowNull: true,

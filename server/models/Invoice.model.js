@@ -20,7 +20,6 @@ const Invoice = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-
     salesPersonId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -44,6 +43,10 @@ const Invoice = sequelize.define(
     project_name: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    client_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     customer_name: {
       type: DataTypes.STRING,

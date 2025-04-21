@@ -30,6 +30,20 @@ export const getAllPayment = createAsyncThunk(
   }
 );
 
+export const getMonthlyPaymentSummary = createAsyncThunk(
+  "getMonthlyPaymentSummary",
+  async (thunkAPI) => {
+    try {
+      const response = await axiosInstance.get(
+        `payment/getMonthlyPaymentSummary`
+      );
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({error: error.message});
+    }
+  }
+);
+
 export const getPaymentById = createAsyncThunk(
   "getPaymentById",
   async (id, thunkAPI) => {
@@ -82,6 +96,7 @@ const authSlice = createSlice({
     singlePayment: {},
     loading: false,
     error: null,
+    dashboardData: {},
   },
   reducers: {},
 
@@ -109,6 +124,18 @@ const authSlice = createSlice({
         state.singlePayment = action.payload.result;
       })
       .addCase(getPaymentById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(getMonthlyPaymentSummary.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getMonthlyPaymentSummary.fulfilled, (state, action) => {
+        state.loading = false;
+        state.dashboardData = action.payload;
+      })
+      .addCase(getMonthlyPaymentSummary.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
