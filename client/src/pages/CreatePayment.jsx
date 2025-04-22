@@ -1,62 +1,141 @@
 /** @format */
 
 import React, {useState, useEffect} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {getAllCompany} from "../redux/slice/company.slice";
+import {getAllInvoices} from "../redux/slice/invoice.slice";
+import {createPayment, updatePayment} from "../redux/slice/payment.slice";
+import {showError, showSuccess} from "../../utils/config";
 
-const dummyCompanies = [
-  {id: 1, name: "Alpha Corp"},
-  {id: 2, name: "Beta Ltd"},
-];
-
-const dummyInvoices = {
-  1: [
-    {id: "INV-101", amount: 1000},
-    {id: "INV-102", amount: 1500},
-  ],
-  2: [
-    {id: "INV-201", amount: 2000},
-    {id: "INV-202", amount: 2500},
-  ],
-};
-
-const CreatePayment = ({onSubmit}) => {
+const CreatePayment = ({setActiveTab}) => {
+  const dispatch = useDispatch();
+  const [allCompanies, setAllCompanies] = useState([]);
+  const [invoices, setAllInvoices] = useState([]);
+  const [filteredInvoices, setFilteredInvoices] = useState([]);
+  const [update, setUpdate] = useState(false);
   const [form, setForm] = useState({
     companyId: "",
     invoiceId: "",
     amount: "",
     description: "",
-    amountPaid: "",
-    method: "Cash",
+    amountPaid: 0,
+    method: "Cash", // default method set to "Cash"
+    totalPaid: "",
   });
 
-  const handleChange = (field, value) => {
-    setForm((prev) => ({...prev, [field]: value}));
-  };
+  const companies = useSelector((state) => state.company.allCompanies);
+  const allInvoices = useSelector((state) => state.invoice.allInvoices);
+  const singleInvoice = useSelector((state) => state.payment.singlePayment);
+
+  console.log("singleInvoice", singleInvoice);
 
   useEffect(() => {
-    if (form.companyId && form.invoiceId) {
-      const selectedInvoice = dummyInvoices[form.companyId]?.find(
-        (inv) => inv.id === form.invoiceId
-      );
-      handleChange("amount", selectedInvoice?.amount || "");
-    }
-  }, [form.invoiceId, form.companyId]);
+    dispatch(getAllCompany());
+  }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const {companyId, invoiceId, amount, amountPaid, description, method} =
-      form;
+  useEffect(() => {
+    if (singleInvoice) {
+      setForm((prev) => ({
+        ...prev,
+        companyId: singleInvoice.companyId,
+        invoiceId: singleInvoice.invoiceId,
+        amount: singleInvoice.amount,
+        amountPaid: singleInvoice.amountPaid,
+        description: singleInvoice.description,
+        method: singleInvoice.method, // Fallback to Cash if undefined
+      }));
+      setUpdate(true);
+    }
+  }, [singleInvoice]);
+
+  useEffect(() => {
+    dispatch(getAllInvoices());
+  }, []);
+
+  useEffect(() => {
     if (
-      companyId &&
-      invoiceId &&
-      amount &&
-      amountPaid &&
-      description &&
-      method
+      form.companyId != null &&
+      form.companyId !== "" &&
+      invoices?.length > 0
     ) {
-      console.log("Payment Submitted: ", form);
-      if (onSubmit) onSubmit(form);
+      const filteredInvoices = invoices.filter(
+        (data) => data.company_id == form.companyId
+      );
+      setFilteredInvoices(filteredInvoices);
+    }
+  }, [form.companyId]);
+
+  useEffect(() => {
+    if (companies?.length > 0) {
+      setAllCompanies(companies);
+    }
+  }, [companies]);
+
+  useEffect(() => {
+    if (allInvoices?.length > 0) {
+      setAllInvoices(allInvoices);
+    }
+  }, [allInvoices]);
+
+  useEffect(() => {
+    const selectedInvoice = allInvoices?.find(
+      (invoice) => invoice.invoice_id == form.invoiceId
+    );
+    setForm((prev) => ({
+      ...prev,
+      amount: selectedInvoice ? selectedInvoice.total_amount : "",
+      totalPaid: selectedInvoice ? selectedInvoice.totalPaid : "",
+    }));
+  }, [form?.invoiceId]);
+
+  useEffect(() => {
+    if (form.amountPaid > form.amount - form.totalPaid) {
+      showError("Amount cannot be greater than Amount to be paid");
+    }
+  }, [form.amountPaid]);
+
+  const handleChange = (field, value) => {
+    console.log("field", field, value);
+    setForm((prev) => ({...prev, [field]: value}));
+    console.log("form", form);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("form", form);
+    const data = await dispatch(createPayment(form));
+    if (data?.payload?.status === 1) {
+      setActiveTab("Payment List");
+      showSuccess(data?.payload?.message);
+      setForm({
+        companyId: "",
+        invoiceId: "",
+        amount: "",
+        description: "",
+        amountPaid: "",
+        method: "Cash",
+      });
     } else {
-      alert("Please fill all the fields.");
+      console.log("error", data?.payload?.error);
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    const data = await dispatch(
+      updatePayment({data: form, id: singleInvoice.payment_id})
+    );
+    if (data?.payload?.status === 1) {
+      setForm({
+        companyId: "",
+        invoiceId: "",
+        amount: "",
+        description: "",
+        amountPaid: "",
+        method: "Cash",
+      });
+      setActiveTab("Payment List");
+      showSuccess(data?.payload?.message);
     }
   };
 
@@ -78,9 +157,9 @@ const CreatePayment = ({onSubmit}) => {
             className='border border-gray-300 rounded-md px-3 py-2'
           >
             <option value=''>-- Select Company --</option>
-            {dummyCompanies.map((company) => (
-              <option key={company.id} value={company.id}>
-                {company.name}
+            {allCompanies?.map((company) => (
+              <option key={company.company_id} value={company.company_id}>
+                {company.company_name}
               </option>
             ))}
           </select>
@@ -99,9 +178,9 @@ const CreatePayment = ({onSubmit}) => {
             disabled={!form.companyId}
           >
             <option value=''>-- Select Invoice --</option>
-            {(dummyInvoices[form.companyId] || []).map((invoice) => (
-              <option key={invoice.id} value={invoice.id}>
-                {invoice.id}
+            {filteredInvoices?.map((invoice) => (
+              <option key={invoice.invoice_id} value={invoice.invoice_id}>
+                {invoice.invoice_id}
               </option>
             ))}
           </select>
@@ -115,9 +194,26 @@ const CreatePayment = ({onSubmit}) => {
           <input
             type='number'
             value={form.amount}
+            placeholder='0.0'
             readOnly
             className='border border-gray-300 rounded-md px-3 py-2 bg-gray-100'
           />
+        </div>
+
+        <div className='flex flex-col'>
+          <label className='mb-1 text-sm font-medium text-gray-700'>
+            Total Amount Paid
+          </label>
+          <input
+            type='number'
+            value={form?.totalPaid}
+            placeholder='0.0'
+            readOnly
+            className='border border-gray-300 rounded-md px-3 py-2 bg-gray-100'
+          />
+          <span className='text-green-800'>
+            Amount to be paid: {form?.amount - form?.totalPaid}
+          </span>
         </div>
 
         {/* Amount Paid */}
@@ -155,7 +251,7 @@ const CreatePayment = ({onSubmit}) => {
             Payment Method
           </label>
           <select
-            value={form.method}
+            value={form.method} // Ensure `method` is properly passed here
             onChange={(e) => handleChange("method", e.target.value)}
             required
             className='border border-gray-300 rounded-md px-3 py-2'
@@ -173,9 +269,9 @@ const CreatePayment = ({onSubmit}) => {
         <button
           type='submit'
           onClick={handleSubmit}
-          className='bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700'
+          className='px-6 py-2 bg-blue-600 text-white rounded-md'
         >
-          Add Payment
+          Create Payment
         </button>
       </div>
     </div>

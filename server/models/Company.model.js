@@ -3,8 +3,8 @@
 const {DataTypes} = require("sequelize");
 const sequelize = require("../connection/db_connection");
 
-const CompanyInfos = sequelize.define(
-  "companyInfos",
+const Company = sequelize.define(
+  "company",
   {
     company_id: {
       type: DataTypes.INTEGER,
@@ -24,6 +24,10 @@ const CompanyInfos = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    company_prefix: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     company_phone: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -31,6 +35,28 @@ const CompanyInfos = sequelize.define(
     company_address: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    gst: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    website: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    color: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "#000000",
+    },
+    bgColor: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "#FFFFFF",
+    },
+    status: {
+      type: DataTypes.ENUM("active", "inactive"),
+      defaultValue: "active",
     },
     is_deleted: {
       type: DataTypes.BOOLEAN,
@@ -43,10 +69,10 @@ const CompanyInfos = sequelize.define(
   }
 );
 
-module.exports = CompanyInfos;
+module.exports = Company;
 
 // const syncDb = async () => {
-//   await CompanyInfos.sync({alter: true});
+//   await Company.sync({alter: true});
 
 //   console.log("synced");
 // };

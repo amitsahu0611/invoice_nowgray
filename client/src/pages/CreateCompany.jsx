@@ -1,41 +1,94 @@
 /** @format */
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
+import {showError, showSuccess} from "../../utils/config";
+import {createCompany, updateCompany} from "../redux/slice/company.slice";
+import {useDispatch, useSelector} from "react-redux";
 
-const CreateCompany = ({onSubmit}) => {
+const CreateCompany = ({setActiveTab}) => {
+  const companyData = useSelector((state) => state.company.singleCompanyData);
+
+  console.log("companyData", companyData);
+
+  const dispatch = useDispatch();
+
   const [form, setForm] = useState({
+    prefix: "",
     name: "",
     email: "",
     color: "#000000", // Default color
     bgColor: "#FFFFFF", // Default background color
     phone: "",
     address: "",
-    description: "",
     gst: "",
     website: "",
     status: "active",
   });
 
+  const [update, setUpdate] = useState(false);
+
+  useEffect(() => {
+    if (companyData) {
+      setForm((prev) => ({
+        ...prev,
+        prefix: companyData?.prefix || "",
+        name: companyData?.company_name || "",
+        email: companyData?.company_email || "",
+        phone: companyData?.company_phone || "",
+        address: companyData?.company_address || "",
+        gst: companyData?.gst || "",
+        website: companyData?.website || "",
+        status: companyData?.status || "active",
+        bgColor: companyData?.bgColor || "#FFFFFF",
+        color: companyData?.color || "#000000",
+      }));
+      setUpdate(true);
+    }
+  }, [companyData]);
+
   const handleChange = (field, value) => {
     setForm((prev) => ({...prev, [field]: value}));
   };
 
-  const toggleStatus = () => {
-    setForm((prev) => ({
-      ...prev,
-      status: prev.status === "active" ? "inactive" : "active",
-    }));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const {name, email, phone, address, website, prefix} = form;
+    console.log("form", form);
+    if (name && email && phone && address && website) {
+      const result = await dispatch(createCompany(form));
+      if (result?.payload?.status === 1) {
+        setActiveTab("Company List");
+        showSuccess("Company created successfully.");
+      }
+    } else {
+      showError("Please fill all the fields.");
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const {name, email, phone, address, description, gst, website} = form;
-    if (name && email && phone && address && description && gst && website) {
-      console.log("Form Submitted: ", form);
-      if (onSubmit) onSubmit(form);
-    } else {
-      alert("Please fill all the fields.");
+  const handleUpdate = async () => {
+    const data = await dispatch(
+      updateCompany({id: companyData.company_id, data: form})
+    );
+    if (data?.payload?.status) {
+      setActiveTab("Company List");
+      showSuccess("Company updated successfully.");
     }
+  };
+
+  const handleCancel = () => {
+    setForm({
+      prefix: "",
+      name: "",
+      email: "",
+      color: "#000000",
+      bgColor: "#FFFFFF",
+      phone: "",
+      address: "",
+      gst: "",
+      website: "",
+      status: "active",
+    });
+    setUpdate(false);
   };
 
   return (
@@ -54,6 +107,20 @@ const CreateCompany = ({onSubmit}) => {
             placeholder='Enter Company Name'
             value={form.name}
             onChange={(e) => handleChange("name", e.target.value)}
+            required
+            className='border border-gray-300 rounded-md px-3 py-2'
+          />
+        </div>
+
+        <div className='flex flex-col'>
+          <label className='mb-1 text-sm font-medium text-gray-700'>
+            Prefix
+          </label>
+          <input
+            type='text'
+            placeholder='Enter Company Prefix'
+            value={form.name}
+            onChange={(e) => handleChange("prefix", e.target.value)}
             required
             className='border border-gray-300 rounded-md px-3 py-2'
           />
@@ -99,20 +166,6 @@ const CreateCompany = ({onSubmit}) => {
             placeholder='Company Address'
             value={form.address}
             onChange={(e) => handleChange("address", e.target.value)}
-            required
-            className='border border-gray-300 rounded-md px-3 py-2'
-          />
-        </div>
-
-        {/* Company Description */}
-        <div className='flex flex-col'>
-          <label className='mb-1 text-sm font-medium text-gray-700'>
-            Description
-          </label>
-          <textarea
-            placeholder='Company Description'
-            value={form.description}
-            onChange={(e) => handleChange("description", e.target.value)}
             required
             className='border border-gray-300 rounded-md px-3 py-2'
           />
@@ -217,11 +270,28 @@ const CreateCompany = ({onSubmit}) => {
       <div className='pt-6 text-right'>
         <button
           type='submit'
-          onClick={handleSubmit}
-          className='bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700'
+          onClick={handleCancel}
+          className='bg-gray-600 mr-4 text-white px-6 py-2 rounded-md hover:bg-gray-700'
         >
-          Add Company
+          Cancel
         </button>
+        {update ? (
+          <button
+            type='submit'
+            onClick={handleUpdate}
+            className='bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700'
+          >
+            Update Company
+          </button>
+        ) : (
+          <button
+            type='submit'
+            onClick={handleSubmit}
+            className='bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700'
+          >
+            Add Company
+          </button>
+        )}
       </div>
     </div>
   );

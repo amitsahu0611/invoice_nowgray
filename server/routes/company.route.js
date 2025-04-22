@@ -6,15 +6,14 @@ const {
   getAllCompanies,
   getCompanyById,
   updateCompany,
-  deleteCompany,
 } = require("../controllers/company.controller");
-const upload = require("../middlewares/multer");
+const logMiddleware = require("../utils/log");
+const verifyToken = require("../utils/verifyToken");
 const router = express.Router();
 
-router.post("/createCompany", upload.single("company_logo"), createCompany);
-router.get("/getAllCompany", getAllCompanies);
-router.get("/getcompanybyID/:id", getCompanyById);
-router.put("/updateCompany/:id", upload.single("company_logo"), updateCompany);
-router.delete("/deleteCompany/:id", deleteCompany);
+router.post("/createCompany", verifyToken, logMiddleware, createCompany);
+router.get("/getAllCompanies", verifyToken, logMiddleware, getAllCompanies);
+router.get("/getCompanyById/:id", verifyToken, logMiddleware, getCompanyById);
+router.put("/updateCompany/:id", verifyToken, logMiddleware, updateCompany);
 
 module.exports = router;

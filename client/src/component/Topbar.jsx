@@ -68,11 +68,11 @@ const Topbar = ({name}) => {
           </div>
         )}
 
-        {topBar === "quotations" && (
+        {/* {topBar === "quotations" && (
           <button className='text-black font-semibold px-4 py-1 rounded border border-black shadow transition duration-300 hover:bg-gray-600 hover:text-white'>
             Create Quotation
           </button>
-        )}
+        )} */}
       </div>
     </div>
   );

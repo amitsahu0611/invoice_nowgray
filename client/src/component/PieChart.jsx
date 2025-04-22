@@ -4,34 +4,45 @@ import {Card, CardBody, CardHeader, Typography} from "@material-tailwind/react";
 import Chart from "react-apexcharts";
 import {FileText} from "lucide-react";
 
-const chartConfig = {
-  type: "pie",
-  width: 280,
-  series: [5, 3, 2], // Replace with dynamic data if needed
-  options: {
-    chart: {
-      toolbar: {
-        show: false,
+// The component now accepts props
+export default function PieChart({
+  allQuotation = 0,
+  allInvoices = 0,
+  approvedInvoice = 0,
+  invoiceDownloaded = 0,
+}) {
+  const chartConfig = {
+    type: "pie",
+    width: 280,
+    series: [allQuotation, approvedInvoice, invoiceDownloaded, allInvoices],
+    options: {
+      chart: {
+        toolbar: {
+          show: false,
+        },
+      },
+      labels: [
+        "Quotation Created",
+        "Quotation Approved",
+        "Invoice Downloaded",
+        "All Invoices",
+      ],
+      dataLabels: {
+        enabled: true,
+      },
+      colors: ["#6366F1", "#10B981", "#F59E0B"], // Tailwind Indigo, Green, Yellow
+      legend: {
+        show: true,
+        position: "bottom",
+        fontSize: "14px",
+        fontFamily: "Inter, sans-serif",
+        labels: {
+          colors: "#4B5563", // Gray-700
+        },
       },
     },
-    labels: ["Quotation Created", "Quotation Approved", "Invoice Downloaded"],
-    dataLabels: {
-      enabled: true,
-    },
-    colors: ["#6366F1", "#10B981", "#F59E0B"], // Tailwind Indigo, Green, Yellow
-    legend: {
-      show: true,
-      position: "bottom",
-      fontSize: "14px",
-      fontFamily: "Inter, sans-serif",
-      labels: {
-        colors: "#4B5563", // Gray-700
-      },
-    },
-  },
-};
+  };
 
-export default function PieChart() {
   return (
     <Card className='w-full'>
       <CardHeader
