@@ -1,6 +1,6 @@
 /** @format */
 
-import React from "react";
+import React, {useEffect} from "react";
 import {jsPDF} from "jspdf";
 import html2canvas from "html2canvas";
 import {forImage} from "../utils/config";
@@ -15,31 +15,62 @@ const InvoiceTemplate3 = ({invoiceData}) => {
   const downloadPDF = () => {
     const input = document.getElementById("invoice-content");
 
+    const originalWidth = input.offsetWidth;
+    const originalHeight = input.offsetHeight;
+
     html2canvas(input, {
-      scale: 3,
+      scale: 2,
       useCORS: true,
       logging: false,
+      width: originalWidth,
+      height: originalHeight,
     }).then((canvas) => {
-      const pdf = new jsPDF("p", "mm", "a4");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
       const imgData = canvas.toDataURL("image/png");
 
-      const pageWidth = pdf.internal.pageSize.width;
-      const imgWidth = pageWidth - 20;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const imgWidth = pageWidth - 20; // 10mm margin each side
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-      pdf.save(`invoice-${invoiceData?.invoice_no}.pdf`);
+      if (imgHeight > pageHeight - 20) {
+        const scaleFactor = (pageHeight - 20) / imgHeight;
+        const scaledWidth = imgWidth * scaleFactor;
 
-      console.log("ino", invoiceData);
+        pdf.addImage(imgData, "PNG", 10, 10, scaledWidth, pageHeight - 20);
+      } else {
+        pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+      }
+
+      pdf.save(`invoice-${invoiceData?.invoice_no || "download"}.pdf`);
     });
   };
+
+  useEffect(() => {
+    if (download) {
+      downloadPDF();
+    }
+  }, [download]);
 
   return (
     <>
       <div>
         <div
           id='invoice-content'
-          className='max-w-7xl w-[210mm] h-[297mm] mx-auto p-6 bg-white border-2 border-gray-200'
+          className='w-[210mm] h-[297mm] mx-auto p-6 bg-white border-2 border-gray-200'
+          style={{
+            width: "210mm",
+            minHeight: "297mm",
+            padding: "15mm",
+            boxSizing: "border-box",
+            fontSize: "12pt",
+          }}
         >
           {/* Header Line */}
           <div className='h-1 bg-indigo-800 mb-6'></div>
@@ -120,7 +151,7 @@ const InvoiceTemplate3 = ({invoiceData}) => {
           </div>
 
           {/* Invoice Table */}
-          <table className='w-full border-collapse mb-8'>
+          <table className='w-full border-collapse mb-8 mt-3'>
             <thead>
               <tr className='text-green-600'>
                 <th className='text-left p-2'>Description</th>
@@ -150,14 +181,20 @@ const InvoiceTemplate3 = ({invoiceData}) => {
           </table>
 
           {/* Notes */}
-          <div className='flex mb-4'>
-            <div className='w-20 text-sm font-semibold text-gray-600'>
-              Notes:
-            </div>
-            <div className='flex-1 text-sm text-gray-500'>
-              This is the advance payment for designs. Payments are
-              non-refundable and follow the agreed schedule.
-            </div>
+          <div className='bg-gray-200 p-3 mb-6 mt-4 text-sm'>
+            <h4 className='mb-2 font-bold'>Terms & Conditions:</h4>
+            <p>
+              {invoiceData?.termsAndConditions?.trim()
+                ? invoiceData.termsAndConditions
+                : "Clients must provide all product details, product images, or the listings. We are not responsible for any copyright issues."}
+            </p>
+
+            <h4 className='mb-2 font-bold mt-4'>Notes:</h4>
+            <p>
+              {invoiceData?.notes?.trim()
+                ? invoiceData.notes
+                : "Clients must provide all product details, product images, or the listings. We are not responsible for any copyright issues."}
+            </p>
           </div>
 
           {/* Terms & Conditions */}
@@ -181,6 +218,16 @@ const InvoiceTemplate3 = ({invoiceData}) => {
                   ₹{invoiceData?.total_amount || 0.0}
                 </div>
               </div>
+              {invoiceData?.discountType && invoiceData?.discountValue && (
+                <div className='text-right mb-2 mt-2'>
+                  <span className='text-sm text-gray-600'>
+                    Discount:{" "}
+                    {invoiceData.discountType === "percent"
+                      ? `${invoiceData.discountValue}%`
+                      : `₹${invoiceData.discountValue}`}
+                  </span>
+                </div>
+              )}
               <div className='flex justify-between py-2'>
                 <div className='text-sm text-green-600'>
                   GST ({invoiceData?.tax_percent}%)
@@ -203,14 +250,6 @@ const InvoiceTemplate3 = ({invoiceData}) => {
               </div>
             </div>
           </div>
-        </div>
-        <div className='flex justify-center mt-6'>
-          <button
-            onClick={downloadPDF}
-            className='bg-green-600 text-white py-2 px-6 rounded-md font-semibold'
-          >
-            Download PDF
-          </button>
         </div>
       </div>
     </>

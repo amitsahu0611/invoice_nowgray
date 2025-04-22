@@ -4,7 +4,6 @@ const Quotation = require("../models/Quotation.model");
 const Invoice = require("../models/Invoice.model");
 const {createSuccess} = require("../utils/response");
 const InvoiceItems = require("../models/InvoiceItem.model");
-const {where} = require("sequelize");
 const QuotationItem = require("../models/QuotationItem.model");
 
 const approvedQuotation = async (req, res) => {
@@ -31,6 +30,7 @@ const approvedQuotation = async (req, res) => {
         client_id: quotation?.client_id || null,
         quotation_id: quotation.quotation_id,
         salesPersonId: quotation.salesPersonId,
+        invoice_patent: quotation.quotation_patent,
         company_id: quotation.company_id,
         category: quotation.category,
         invoice_no: newInvoiceNo,

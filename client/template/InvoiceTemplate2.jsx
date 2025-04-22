@@ -1,11 +1,11 @@
 /** @format */
 
-import React from "react";
+import React, {useEffect} from "react";
 import {jsPDF} from "jspdf";
 import html2canvas from "html2canvas";
 import {Base_URL, forImage} from "../utils/config";
 
-const InvoiceTemplate2 = ({invoiceData}) => {
+const InvoiceTemplate2 = ({invoiceData, download}) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString); // Create a Date object from the string
     const options = {year: "numeric", month: "long", day: "numeric"}; // Format options
@@ -14,46 +14,62 @@ const InvoiceTemplate2 = ({invoiceData}) => {
   const downloadPDF = () => {
     const input = document.getElementById("invoice-content");
 
+    // Set a fixed width for better scaling
+    const originalWidth = input.offsetWidth;
+    const originalHeight = input.offsetHeight;
+
     html2canvas(input, {
-      scale: 3,
+      scale: 2,
       useCORS: true,
       logging: false,
+      width: originalWidth,
+      height: originalHeight,
     }).then((canvas) => {
-      const pdf = new jsPDF("p", "mm", "a4");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
       const imgData = canvas.toDataURL("image/png");
 
-      const pageWidth = pdf.internal.pageSize.width;
-      const pageHeight = pdf.internal.pageSize.height;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
       const imgWidth = pageWidth - 20;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-      pdf.save(`invoice-${invoiceData?.invoice_no}.pdf`);
+      if (imgHeight > pageHeight - 20) {
+        const scaleFactor = (pageHeight - 20) / imgHeight;
+        const scaledWidth = imgWidth * scaleFactor;
 
-      console.log("ino", invoiceData);
+        pdf.addImage(imgData, "PNG", 10, 10, scaledWidth, pageHeight - 20);
+      } else {
+        pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+      }
 
-      // fetch(`${Base_URL}nowgrayInvoice`, {
-      //   method: "POST",
-      //   body: JSON.stringify(invoiceData),
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      // })
-      //   .then((response) => response.json())
-      //   .then((data) => {
-      //     console.log("PDF uploaded successfully, file path:", data.filePath);
-      //   })
-      //   .catch((error) => {
-      //     console.error("Error uploading PDF:", error);
-      //   });
+      pdf.save(`invoice-${invoiceData?.invoice_no || "download"}.pdf`);
     });
   };
+
+  useEffect(() => {
+    if (download) {
+      downloadPDF();
+    }
+  }, [download]);
 
   return (
     <div>
       <div
         id='invoice-content'
-        className='max-w-4xl w-[210mm] h-[297mm] bg-white mx-auto shadow-lg'
+        className='w-[210mm] h-[297mm] mx-auto p-6 bg-white border-2 border-gray-200'
+        style={{
+          width: "210mm",
+          minHeight: "297mm",
+          padding: "5mm",
+          boxSizing: "border-box",
+          fontSize: "12pt",
+        }}
       >
         {/* Header */}
         <div className='bg-blue-900 h-4 w-full'></div>
@@ -77,8 +93,9 @@ const InvoiceTemplate2 = ({invoiceData}) => {
           <div className='flex justify-end mt-0'>
             <img
               style={{width: "35%"}}
-              src={`${forImage}/logo/Nowgray.png`}
+              src={`http://localhost:5173/logo/Nowgray.png`}
               alt='Nowgray'
+              onLoad={() => console.log("Image loaded")}
             />
           </div>
         </div>
@@ -189,24 +206,25 @@ const InvoiceTemplate2 = ({invoiceData}) => {
 
         {/* Summary Section */}
         <div className='flex justify-between px-6 mt-6'>
-          <div className='w-3/5'>
-            <p className='text-sm text-gray-600'>
-              Thank you for choosing our{" "}
-              <a href='#' className='text-blue-900 font-semibold'>
-                {invoiceData?.project_name || "N/A"}
-              </a>
-              ! We appreciate your trust and are committed to supporting your
-              business needs.
+          <div className='w-3/5 text-sm'>
+            <p>
+              {invoiceData?.termsAndConditions?.trim()
+                ? invoiceData.termsAndConditions
+                : "Clients must provide all product details, product images, or the listings. We are not responsible for any copyright issues."}
             </p>
           </div>
           <div className='w-2/5'>
             <table className='w-full'>
-              <tr>
-                <td className='text-sm'>Subtotal</td>
-                <td className='text-sm text-right'>
-                  ₹{invoiceData?.total_amount || 0.0}
-                </td>
-              </tr>
+              {invoiceData?.discountType && invoiceData?.discountValue && (
+                <tr>
+                  <td className='text-sm'>Discount</td>
+                  <td className='text-sm text-right'>
+                    {invoiceData.discountType === "percent"
+                      ? `${invoiceData.discountValue}%`
+                      : `₹${invoiceData.discountValue}`}
+                  </td>
+                </tr>
+              )}
               <tr>
                 <td className='text-sm'>GST ({invoiceData?.tax_percent}%)</td>
                 <td className='text-sm text-right'>
@@ -250,14 +268,6 @@ const InvoiceTemplate2 = ({invoiceData}) => {
       </div>
 
       {/* Download Button */}
-      <div className='flex justify-center mt-6'>
-        <button
-          onClick={downloadPDF}
-          className='bg-green-600 text-white py-2 px-6 rounded-md font-semibold'
-        >
-          Download PDF
-        </button>
-      </div>
     </div>
   );
 };

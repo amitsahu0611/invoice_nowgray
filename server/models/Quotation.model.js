@@ -22,6 +22,10 @@ const Quotation = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    quotation_patent: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
 
     category: {
       type: DataTypes.STRING,

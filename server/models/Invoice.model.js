@@ -24,6 +24,11 @@ const Invoice = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    invoice_patent: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
     category: {
       type: DataTypes.STRING,
       allowNull: true,

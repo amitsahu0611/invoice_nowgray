@@ -12,6 +12,9 @@ import {
   showSuccess,
 } from "../../utils/config";
 import {getAllInvoices, getInvoiceById} from "../redux/slice/invoice.slice";
+import InvoiceTemplate3 from "../../template/InvoiceTemplate3";
+import InvoiceTemplate2 from "../../template/InvoiceTemplate2";
+import {createDownloadLog} from "../redux/slice/reports.slice";
 
 const TABLE_HEAD = [
   "Invoice ID",
@@ -46,7 +49,12 @@ export default function InvoiceList({setActiveTab}) {
   const [searchQuery, setSearchQuery] = useState("");
   const [invoices, setAllInvoices] = useState([]);
   const [userData, setUserData] = useState({});
-  console.log("invoices", invoices);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [triggerDownload, setTriggerDownload] = useState(false);
+
+  const [showModal, setShowModal] = useState(false);
+
+  console.log("selectedInvoice", selectedInvoice);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,13 +91,45 @@ export default function InvoiceList({setActiveTab}) {
       row?.approvedDate.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleView = (id) => {
-    dispatch(getInvoiceById(id));
-    setActiveTab("Edit Invoices");
+  const handleView = (invoice) => {
+    setSelectedInvoice(invoice);
+    setShowModal(true);
   };
 
-  const handleDownload = (data) => {
-    <InvoiceTemplate1 invoiceData={data} download={true} />;
+  // const handleDownload = (data) => {
+  //   console.log("data", data);
+  //   setSelectedInvoice(data);
+  //   setTriggerDownload(true);
+
+  //   // Log the download
+  //   const objReq = {
+  //     documentNumber: data?.quotation_id,
+  //     downloadedAt: new Date(),
+  //     downloaderRole: userData.role_id,
+  //     downloaderName: userData.full_Name,
+  //     type: "invoice",
+  //     downloadedBy: userData.user_id,
+  //   };
+  //   dispatch(createDownloadLog(objReq));
+  // };
+
+  const handleDownload = (quote) => {
+    console.log("quote", quote);
+    setSelectedInvoice(quote);
+    if (selectedInvoice) {
+      setTriggerDownload(true);
+
+      // Log the download
+      const objReq = {
+        documentNumber: selectedInvoice?.quotation_id,
+        downloadedAt: new Date(),
+        downloaderRole: userData.role_id,
+        downloaderName: userData.full_Name,
+        type: "invoice",
+        downloadedBy: userData.user_id,
+      };
+      dispatch(createDownloadLog(objReq));
+    }
   };
 
   //   const handleApprove = async (quote) => {
@@ -133,6 +173,21 @@ export default function InvoiceList({setActiveTab}) {
 
   //     setAllInvoices(updated);
   //   };
+
+  const handleCancel = () => {
+    setShowModal(false);
+    setSelectedInvoice(null);
+  };
+
+  useEffect(() => {
+    if (triggerDownload) {
+      // Reset after a short delay to ensure the download has started
+      const timer = setTimeout(() => {
+        setTriggerDownload(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [triggerDownload]);
 
   return (
     <div className='overflow-hidden rounded-lg border bg-white shadow-md'>
@@ -193,7 +248,7 @@ export default function InvoiceList({setActiveTab}) {
                   <Pencil className='h-5 w-5 mr-3' />
                 </button> */}
                 <button
-                  onClick={() => handleView(quote?.quotation_id)}
+                  onClick={() => handleView(quote)}
                   className='text-blue-600 hover:text-blue-800'
                 >
                   <Eye className='h-5 w-5' />
@@ -209,6 +264,80 @@ export default function InvoiceList({setActiveTab}) {
           ))}
         </tbody>
       </table>
+      {showModal && selectedInvoice && (
+        <div className='fixed inset-0 z-50 flex flex-col items-center gap-4 justify-center bg-black bg-opacity-50'>
+          <div className='relative bg-white rounded-lg shadow-lg w-[860px] max-h-[90vh] overflow-hidden'>
+            {/* Modal Header */}
+            <div className='flex items-center justify-between p-4 border-b'>
+              <h3 className='text-lg font-semibold'>
+                Invoice #{selectedInvoice.quotation_id}
+              </h3>
+            </div>
+
+            {/* Scrollable content area */}
+            <div className='overflow-y-auto p-6' style={{maxHeight: "80vh"}}>
+              {/* Fixed A4 size content box */}
+              <div
+                className='mx-auto bg-white'
+                style={{
+                  width: "210mm",
+                  minHeight: "297mm",
+                  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+                }}
+              >
+                {selectedInvoice?.invoice_patent == 1 && (
+                  <InvoiceTemplate1
+                    invoiceData={selectedInvoice}
+                    download={false}
+                  />
+                )}
+                {selectedInvoice?.invoice_patent == 2 && (
+                  <InvoiceTemplate2
+                    invoiceData={selectedInvoice}
+                    download={false}
+                  />
+                )}
+                {selectedInvoice?.invoice_patent == 3 && (
+                  <InvoiceTemplate3
+                    invoiceData={selectedInvoice}
+                    download={false}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleCancel}
+            className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'
+          >
+            Close
+          </button>
+        </div>
+      )}
+
+      {/* Hidden component for downloading */}
+      {triggerDownload && selectedInvoice && (
+        <div style={{display: "none"}}>
+          {selectedInvoice?.quotation_patent == 1 && (
+            <InvoiceTemplate1
+              invoiceData={selectedInvoice}
+              download={triggerDownload}
+            />
+          )}
+          {selectedInvoice?.quotation_patent == 2 && (
+            <InvoiceTemplate2
+              invoiceData={selectedInvoice}
+              download={triggerDownload}
+            />
+          )}
+          {selectedInvoice?.quotation_patent == 3 && (
+            <InvoiceTemplate3
+              invoiceData={selectedInvoice}
+              download={triggerDownload}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

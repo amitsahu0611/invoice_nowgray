@@ -1,13 +1,13 @@
 /** @format */
 
-// export const Base_URL = "http://localhost:8001/api/";
-// export const Image_URL = "http://localhost:8001/";
+export const Base_URL = "http://localhost:8001/api/";
+export const Image_URL = "http://localhost:8001/";
 
 // export const forImage = "https://ng-invoice.nowgray.live";
 export const forImage = "http://localhost:5173";
 
-export const Base_URL = "https://ng-invoice-api.nowgray.live/api/";
-export const Image_URL = "https://ng-invoice-api.nowgray.live/";
+// export const Base_URL = "https://ng-invoice-api.nowgray.live/api/";
+// export const Image_URL = "https://ng-invoice-api.nowgray.live/";
 
 // export const Base_URL = "https://invoice-api.nowgray.live/api/";
 // export const Image_URL = "https://invoice-api.nowgray.live/";
