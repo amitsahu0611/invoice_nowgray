@@ -30,12 +30,13 @@ const getStatusColor = (status) => {
 export default function DownloadLogs({setActiveTab}) {
   const dispatch = useDispatch();
   const allLogs = useSelector((state) => state.report.downloadLogs);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    dispatch(allDownloadLog());
-  }, []);
+    dispatch(allDownloadLog(currentPage));
+  }, [currentPage]);
 
   useEffect(() => {
     if (allLogs?.length > 0) {
@@ -50,9 +51,9 @@ export default function DownloadLogs({setActiveTab}) {
   // Filter the rows based on the search query
   const filteredRows = logs?.filter((row) => {
     const role = (r) => {
-      if (r == 1) return "Admin";
+      if (r == 0) return "Admin";
+      if (r == 1) return "Accounts";
       if (r == 2) return "Sales";
-      if (r == 3) return "Accounts";
       return "";
     };
 
@@ -74,36 +75,20 @@ export default function DownloadLogs({setActiveTab}) {
   const handleDownload = () => {
     if (logs.length === 0) return;
 
-    // Define the fields you want to include in the Excel file
-    const exportData = staffs.map(
-      ({full_Name, company_name, mobile, email, is_active}) => ({
-        "Staff Name": full_Name,
-        "Company Name": company_name,
-        Phone: mobile,
-        Email: email,
-        Status: is_active ? "Active" : "Inactive",
-      })
-    );
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const worksheet = XLSX.utils.json_to_sheet(logs);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "StaffList");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "logs");
 
-    XLSX.writeFile(workbook, "StaffList.xlsx");
-  };
-
-  const handleEdit = (id) => {
-    if (id) {
-      dispatch(getUserById(id));
-      setActiveTab("Create Staff");
-    }
+    XLSX.writeFile(workbook, "logs.xlsx");
   };
 
   return (
     <div className='overflow-hidden rounded-lg border bg-white shadow-md'>
       <div className='flex items-center justify-between p-4 border-b'>
         <div>
-          <h2 className='text-lg font-semibold text-gray-700'>Staff List</h2>
+          <h2 className='text-lg font-semibold text-gray-700'>
+            Document Download Logs
+          </h2>
         </div>
         <div className='flex items-center gap-4'>
           <div className='w-72'>
@@ -142,11 +127,11 @@ export default function DownloadLogs({setActiveTab}) {
         <tbody>
           {filteredRows?.map((row, index) => {
             const role = (role) => {
-              if (role == 1) {
+              if (role == 0) {
                 return "Admin";
               } else if (role == 2) {
                 return "Sales";
-              } else if (role == 3) {
+              } else if (role == 1) {
                 return "Accounts";
               }
             };
@@ -161,8 +146,39 @@ export default function DownloadLogs({setActiveTab}) {
               </tr>
             );
           })}
+          {filteredRows?.length === 0 && (
+            <tr>
+              <td colSpan={11} className='p-4 text-center text-gray-500'>
+                No Logs found
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+      <div className='flex justify-center items-center p-4 border-t bg-white'>
+        <div className='flex items-center space-x-2'>
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className={`px-4 py-2 text-sm rounded transition ${
+              currentPage === 1
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Prev
+          </button>
+          <button className='px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded shadow'>
+            {currentPage}
+          </button>
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className='px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition'
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

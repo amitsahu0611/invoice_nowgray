@@ -5,9 +5,9 @@ import axiosInstance from "../../../utils/axiosInstance";
 
 export const getAllInvoices = createAsyncThunk(
   "getAllInvoices",
-  async (thunkAPI) => {
+  async (start, thunkAPI) => {
     try {
-      const response = await axiosInstance.get(`invoices/allInvoices`);
+      const response = await axiosInstance.get(`invoices/allInvoices/${start}`);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});

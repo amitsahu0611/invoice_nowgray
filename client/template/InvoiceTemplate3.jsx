@@ -5,7 +5,7 @@ import {jsPDF} from "jspdf";
 import html2canvas from "html2canvas";
 import {forImage} from "../utils/config";
 
-const InvoiceTemplate3 = ({invoiceData}) => {
+const InvoiceTemplate3 = ({invoiceData, download}) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString); // Create a Date object from the string
     const options = {year: "numeric", month: "long", day: "numeric"}; // Format options
@@ -232,20 +232,12 @@ const InvoiceTemplate3 = ({invoiceData}) => {
                 <div className='text-sm text-green-600'>
                   GST ({invoiceData?.tax_percent}%)
                 </div>
-                <div className='text-sm text-right'>
-                  {" "}
-                  ₹{" "}
-                  {(invoiceData?.tax_percent / 100) *
-                    invoiceData?.total_amount || 0.0}
-                </div>
+                <div className='text-sm text-right'> ₹{gstAmount}</div>
               </div>
               <div className='flex justify-between py-2 border-t border-green-600'>
                 <div className='text-lg font-bold text-green-600'>Total</div>
                 <div className='text-lg font-bold text-right text-green-600'>
-                  ₹{" "}
-                  {parseInt(invoiceData?.total_amount) +
-                    (invoiceData?.tax_percent / 100) *
-                      invoiceData?.total_amount || 0.0}
+                  ₹{finalPayable || 0.0}
                 </div>
               </div>
             </div>

@@ -102,6 +102,10 @@ const CreatePayment = ({setActiveTab}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form?.amount - form?.totalPaid < form?.amountPaid) {
+      showError("Cannot pay more than to be paid amount");
+      return;
+    }
     console.log("form", form);
     const data = await dispatch(createPayment(form));
     if (data?.payload?.status === 1) {
@@ -180,7 +184,7 @@ const CreatePayment = ({setActiveTab}) => {
             <option value=''>-- Select Invoice --</option>
             {filteredInvoices?.map((invoice) => (
               <option key={invoice.invoice_id} value={invoice.invoice_id}>
-                {invoice.invoice_id}
+                {invoice.invoice_no}
               </option>
             ))}
           </select>

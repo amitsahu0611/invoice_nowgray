@@ -28,9 +28,11 @@ export const createQuotation = createAsyncThunk(
 
 export const getAllQuotations = createAsyncThunk(
   "getAllQuotations",
-  async (thunkAPI) => {
+  async (start, thunkAPI) => {
     try {
-      const response = await axiosInstance.get(`quotation/getAllQuotations`);
+      const response = await axiosInstance.get(
+        `quotation/getAllQuotations/${start}`
+      );
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});

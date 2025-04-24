@@ -64,6 +64,7 @@ const createQuotation = async (req, res) => {
 
 // 2. Get All Quotations
 const getAllQuotations = async (req, res) => {
+  const {start} = req.params;
   try {
     const quotations = await Quotation.findAll({
       order: [["createdAt", "DESC"]],
@@ -77,6 +78,12 @@ const getAllQuotations = async (req, res) => {
       where: {
         quotation_id: quotationIds,
       },
+      ...(Number.isNaN(Number(start)) || start === undefined
+        ? {} // If start is NaN or undefined, no offset/limit
+        : {
+            offset: start * 15,
+            limit: 15,
+          }),
     });
 
     // Group items by quotation_id
@@ -183,9 +190,12 @@ const updateQuotation = async (req, res) => {
   }
 };
 
+const GetFilterQuotation = async (req, res) => {};
+
 module.exports = {
   createQuotation,
   getAllQuotations,
   getQuotationById,
   updateQuotation,
+  GetFilterQuotation,
 };

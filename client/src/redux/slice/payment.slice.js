@@ -20,9 +20,11 @@ export const createPayment = createAsyncThunk(
 
 export const getAllPayment = createAsyncThunk(
   "getAllPayment",
-  async (thunkAPI) => {
+  async (start, thunkAPI) => {
     try {
-      const response = await axiosInstance.get(`payment/getAllPayment`);
+      const response = await axiosInstance.get(
+        `payment/getAllPayment/${start}`
+      );
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});

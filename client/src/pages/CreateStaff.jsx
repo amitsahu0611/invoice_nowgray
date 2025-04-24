@@ -159,7 +159,9 @@ const CreateStaff = ({setActiveTab}) => {
   return (
     <div className='w-full max-w-8xl mx-auto mt-10 shadow-lg p-8 bg-white rounded-lg'>
       <h2 className='text-2xl font-semibold text-blue-gray-700 mb-6'>
-        {staffData ? "Update Staff" : "Add New Staff"}
+        {staffData && Object.keys(staffData) == 0
+          ? "Add New Staff"
+          : "Update New Staff"}
       </h2>
 
       <form
@@ -304,11 +306,20 @@ const CreateStaff = ({setActiveTab}) => {
         </button>
         <button
           type='submit'
-          onClick={handleSubmit}
+          onClick={
+            staffData && Object.keys(staffData) == 0
+              ? handleSubmit
+              : handleUpdate
+          }
           className='bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700'
         >
-          {staffData ? "Update Staff" : "Add Staff"}
+          {staffData && Object.keys(staffData) == 0
+            ? "Add Staff"
+            : "Update Staff"}
         </button>
+      </div>
+      <div className='text-center text-sm text-green-700 italic'>
+        To create a new staff please click on cancel button
       </div>
     </div>
   );

@@ -322,6 +322,8 @@ const QuotationForm = ({setActiveTab}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
 
+  console.log("selectedBox", selectedBox);
+
   const handleBoxClick = (e, index) => {
     e.stopPropagation();
     setSelectedBox(index);
@@ -333,6 +335,7 @@ const QuotationForm = ({setActiveTab}) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted with values:", formValues);
+    formValues.quotation_patent = selectedBox + 1;
     const data = await dispatch(createQuotation(formValues));
     if (data?.payload?.status == 1) {
       setActiveTab("Quotation List");

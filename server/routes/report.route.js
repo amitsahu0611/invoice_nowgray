@@ -15,12 +15,17 @@ const router = express.Router();
 router.get("/paymentReport", verifyToken, logMiddleware, paymentReport);
 router.post("/createDownloadLog", logMiddleware, createDownloadLog);
 router.get(
-  "/getAllDownloadLogs",
+  "/getAllDownloadLogs/:start",
   verifyToken,
   logMiddleware,
   getAllDownloadLogs
 );
-router.get("/getAllMethodLogs", verifyToken, logMiddleware, getAllMethodLogs);
+router.get(
+  "/getAllMethodLogs/:start",
+  verifyToken,
+  logMiddleware,
+  getAllMethodLogs
+);
 router.get("/reportByCustomer", reportByCustomer);
 
 module.exports = router;

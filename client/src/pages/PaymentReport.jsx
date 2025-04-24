@@ -9,6 +9,7 @@ import {
 } from "../redux/slice/quotation.slice";
 import {useDispatch, useSelector} from "react-redux";
 import InvoiceTemplate1 from "../../template/InvoiceTemplate1";
+import * as XLSX from "xlsx";
 import {getUserData, showError, showSuccess} from "../../utils/config";
 import {getPaymentReport} from "../redux/slice/reports.slice";
 
@@ -70,7 +71,6 @@ export default function PaymentReport({setActiveTab}) {
     dispatch(getPaymentReport());
   }, []);
 
-  // Filter the rows based on the search query
   const filteredRows = reports?.filter((row) => {
     const query = searchQuery.toLowerCase();
 
@@ -88,14 +88,16 @@ export default function PaymentReport({setActiveTab}) {
   });
   console.log("filteredRows", filteredRows);
 
-  const handleView = (id) => {
-    dispatch(getQuotationById(id));
-    setActiveTab("Create Quotation");
+  const handleExport = () => {
+    if (paymentReports?.length === 0) return;
+
+    const worksheet = XLSX.utils.json_to_sheet(paymentReports);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "paymentReports");
+
+    XLSX.writeFile(workbook, "Payment Reports.xlsx");
   };
 
-  const handleDownload = (data) => {
-    <InvoiceTemplate1 invoiceData={data} download={true} />;
-  };
   return (
     <div className='overflow-hidden rounded-lg border bg-white shadow-md'>
       <div className='flex items-center justify-between p-4 border-b'>
@@ -114,7 +116,10 @@ export default function PaymentReport({setActiveTab}) {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className='flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-blue-600 border-blue-600 hover:bg-blue-100'>
+          <button
+            onClick={handleExport}
+            className='flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-blue-600 border-blue-600 hover:bg-blue-100'
+          >
             <Download className='w-4 h-4' />
             Download
           </button>
@@ -153,6 +158,13 @@ export default function PaymentReport({setActiveTab}) {
               </tr>
             );
           })}
+          {filteredRows?.length === 0 && (
+            <tr>
+              <td colSpan={11} className='p-4 text-center text-gray-500'>
+                No Report found
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

@@ -5,6 +5,8 @@ import {Download, Pencil, Eye} from "lucide-react";
 import {getQuotationById} from "../redux/slice/quotation.slice";
 import {useDispatch, useSelector} from "react-redux";
 import InvoiceTemplate1 from "../../template/InvoiceTemplate1";
+
+import * as XLSX from "xlsx";
 import {
   formatDate,
   getUserData,
@@ -51,6 +53,7 @@ export default function InvoiceList({setActiveTab}) {
   const [userData, setUserData] = useState({});
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [triggerDownload, setTriggerDownload] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [showModal, setShowModal] = useState(false);
 
@@ -69,8 +72,8 @@ export default function InvoiceList({setActiveTab}) {
   const allInvoices = useSelector((state) => state.invoice.allInvoices);
 
   useEffect(() => {
-    dispatch(getAllInvoices());
-  }, []);
+    dispatch(getAllInvoices(currentPage));
+  }, [currentPage]);
 
   useEffect(() => {
     if (allInvoices?.length > 0) {
@@ -189,6 +192,32 @@ export default function InvoiceList({setActiveTab}) {
     }
   }, [triggerDownload]);
 
+  const handleModalDownload = () => {
+    if (selectedInvoice) {
+      setTriggerDownload(true);
+
+      const objReq = {
+        documentNumber: selectedInvoice?.quotation_id,
+        downloadedAt: new Date(),
+        downloaderRole: userData.role_id,
+        downloaderName: userData.full_Name,
+        type: "quotation",
+        downloadedBy: userData.user_id,
+      };
+      dispatch(createDownloadLog(objReq));
+    }
+  };
+
+  const handleExport = () => {
+    if (invoices?.length === 0) return;
+
+    const worksheet = XLSX.utils.json_to_sheet(invoices);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Invoices");
+
+    XLSX.writeFile(workbook, "Invoice.xlsx");
+  };
+
   return (
     <div className='overflow-hidden rounded-lg border bg-white shadow-md'>
       <div className='flex items-center justify-between p-4 border-b'>
@@ -205,7 +234,10 @@ export default function InvoiceList({setActiveTab}) {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className='flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-blue-600 border-blue-600 hover:bg-blue-100'>
+          <button
+            onClick={handleExport}
+            className='flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-blue-600 border-blue-600 hover:bg-blue-100'
+          >
             <Download className='w-4 h-4' />
             Download
           </button>
@@ -254,7 +286,11 @@ export default function InvoiceList({setActiveTab}) {
                   <Eye className='h-5 w-5' />
                 </button>
                 <button
-                  onClick={() => handleDownload(quote)}
+                  onClick={() => {
+                    setSelectedInvoice(quote);
+                    setShowModal(true);
+                    handleModalDownload();
+                  }}
                   className='text-green-600 hover:text-green-800'
                 >
                   <Download className='h-5 w-5 ml-3' />
@@ -262,8 +298,40 @@ export default function InvoiceList({setActiveTab}) {
               </td>
             </tr>
           ))}
+          {filteredRows?.length === 0 && (
+            <tr>
+              <td colSpan={11} className='p-4 text-center text-gray-500'>
+                No Invoice found
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+      <div className='flex justify-center items-center p-4 border-t bg-white'>
+        <div className='flex items-center space-x-2'>
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className={`px-4 py-2 text-sm rounded transition ${
+              currentPage === 1
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Prev
+          </button>
+          <button className='px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded shadow'>
+            {currentPage}
+          </button>
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className='px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition'
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
       {showModal && selectedInvoice && (
         <div className='fixed inset-0 z-50 flex flex-col items-center gap-4 justify-center bg-black bg-opacity-50'>
           <div className='relative bg-white rounded-lg shadow-lg w-[860px] max-h-[90vh] overflow-hidden'>
@@ -272,6 +340,21 @@ export default function InvoiceList({setActiveTab}) {
               <h3 className='text-lg font-semibold'>
                 Invoice #{selectedInvoice.quotation_id}
               </h3>
+              <div className='flex space-x-2'>
+                <button
+                  onClick={handleModalDownload}
+                  className='flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors'
+                >
+                  <Download className='w-4 h-4' />
+                  Download
+                </button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className='text-gray-600 hover:text-red-500 text-xl font-bold'
+                >
+                  ×
+                </button>
+              </div>
             </div>
 
             {/* Scrollable content area */}
@@ -318,19 +401,19 @@ export default function InvoiceList({setActiveTab}) {
       {/* Hidden component for downloading */}
       {triggerDownload && selectedInvoice && (
         <div style={{display: "none"}}>
-          {selectedInvoice?.quotation_patent == 1 && (
+          {selectedInvoice?.invoice_patent == 1 && (
             <InvoiceTemplate1
               invoiceData={selectedInvoice}
               download={triggerDownload}
             />
           )}
-          {selectedInvoice?.quotation_patent == 2 && (
+          {selectedInvoice?.invoice_patent == 2 && (
             <InvoiceTemplate2
               invoiceData={selectedInvoice}
               download={triggerDownload}
             />
           )}
-          {selectedInvoice?.quotation_patent == 3 && (
+          {selectedInvoice?.invoice_patent == 3 && (
             <InvoiceTemplate3
               invoiceData={selectedInvoice}
               download={triggerDownload}

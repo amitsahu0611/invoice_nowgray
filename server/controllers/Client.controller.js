@@ -34,11 +34,20 @@ const createClient = async (req, res) => {
 
 // Get all clients
 const getAllClients = async (req, res) => {
+  const {start} = req.params;
+
   try {
     const clients = await Client.findAll({
       where: {is_deleted: false},
       order: [["createdAt", "DESC"]],
       raw: true,
+
+      ...(Number.isNaN(Number(start)) || start === undefined
+        ? {} // If start is NaN or undefined, no offset/limit
+        : {
+            offset: (start - 1) * 15,
+            limit: 15,
+          }),
     });
 
     const companies = await Company.findAll({

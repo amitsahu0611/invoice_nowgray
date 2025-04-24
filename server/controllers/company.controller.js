@@ -31,8 +31,17 @@ const createCompany = async (req, res) => {
 };
 
 const getAllCompanies = async (req, res) => {
+  const {start} = req.params;
+
   try {
-    const companies = await Company.findAll();
+    const companies = await Company.findAll({
+      ...(Number.isNaN(Number(start)) || start === undefined
+        ? {}
+        : {
+            offset: (start - 1) * 15,
+            limit: 15,
+          }),
+    });
     res.json(companies);
   } catch (error) {
     res.status(500).json({error: error.message});

@@ -30,15 +30,16 @@ const getStatusColor = (status) => {
 export default function StaffList({setActiveTab}) {
   const dispatch = useDispatch();
   const allStaffs = useSelector((state) => state.auth.allStaffs);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [staffs, setAllStaffs] = useState([]);
 
   useEffect(() => {
-    dispatch(getAllUsers());
-  }, []);
+    dispatch(getAllUsers(currentPage));
+  }, [currentPage]);
 
   useEffect(() => {
-    if (allStaffs.length > 0) {
+    if (allStaffs?.length > 0) {
       setAllStaffs(allStaffs);
     }
   }, [allStaffs]);
@@ -175,8 +176,39 @@ export default function StaffList({setActiveTab}) {
               </tr>
             );
           })}
+          {filteredRows?.length === 0 && (
+            <tr>
+              <td colSpan={11} className='p-4 text-center text-gray-500'>
+                No Staff found
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+      <div className='flex justify-center items-center p-4 border-t bg-white'>
+        <div className='flex items-center space-x-2'>
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className={`px-4 py-2 text-sm rounded transition ${
+              currentPage === 1
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Prev
+          </button>
+          <button className='px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded shadow'>
+            {currentPage}
+          </button>
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className='px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition'
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

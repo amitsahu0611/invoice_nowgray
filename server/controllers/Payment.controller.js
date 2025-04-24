@@ -86,41 +86,106 @@ const getPaymentById = async (req, res) => {
   }
 };
 
+// const getAllPayments = async (req, res) => {
+//   const {start} = req.params;
+//   try {
+//     const payments = await Payment.findAll({
+//       order: [["createdAt", "DESC"]],
+//       ...(Number.isNaN(Number(start)) || start === undefined
+//         ? {}
+//         : {
+//             offset: (start - 1) * 15,
+//             limit: 15,
+//           }),
+//     });
+//     const companies = await Company.findAll({order: [["createdAt", "DESC"]]});
+//     const user = await Users.findAll({order: [["createdAt", "DESC"]]});
+//     console.log("payments", payments, user);
+
+//     const allPayments = payments?.map((payment) => {
+//       const company = companies.find(
+//         (company) => company.company_id === payment.companyId
+//       );
+//       const username = user.find(
+//         (user) => parseInt(user.user_id) === parseInt(payment.createdBy)
+//       ).full_Name;
+//       const approver = user.find(
+//         (u) => parseInt(u.dataValues.user_id) === parseInt(payment.approvedBy)
+//       );
+
+//       const approverName = approver?.dataValues?.full_Name || "N/A";
+
+//       console.log("approverName:", approverName);
+
+//       console.log("username", username);
+//       return {
+//         ...payment.dataValues,
+//         companyName: company ? company.company_name : "Unknown",
+//         username: username ? username : "Unknown",
+//         approverName: approverName ? approverName : "Unknown",
+//       };
+//     });
+
+//     res.json(createSuccess("Payments fetched successfully", allPayments));
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({error: "Failed to fetch payments", details: error.message});
+//   }
+// };
+
 const getAllPayments = async (req, res) => {
+  const {start} = req.params;
+
   try {
-    const payments = await Payment.findAll({order: [["createdAt", "DESC"]]});
+    const payments = await Payment.findAll({
+      order: [["createdAt", "DESC"]],
+      ...(Number.isNaN(Number(start)) || start === undefined
+        ? {}
+        : {
+            offset: (start - 1) * 15,
+            limit: 15,
+          }),
+    });
+
     const companies = await Company.findAll({order: [["createdAt", "DESC"]]});
-    const user = await Users.findAll({order: [["createdAt", "DESC"]]});
+    const users = await Users.findAll({order: [["createdAt", "DESC"]]});
 
-    const allPayments = payments?.map((payment) => {
+    // Now enrich payments
+    const allPayments = payments.map((payment) => {
+      const paymentData = payment.dataValues;
+
       const company = companies.find(
-        (company) => company.company_id === payment.companyId
-      );
-      const username = user.find(
-        (user) => parseInt(user.company_id) === parseInt(payment.companyId)
-      ).full_Name;
-      const approver = user.find(
-        (u) => parseInt(u.dataValues.user_id) === parseInt(payment.approvedBy)
+        (c) => c.dataValues.company_id === paymentData.companyId
       );
 
-      const approverName = approver?.dataValues?.full_Name || "N/A";
+      const createdByUser = users.find(
+        (u) =>
+          parseInt(u.dataValues.user_id) === parseInt(paymentData.createdBy)
+      );
 
-      console.log("approverName:", approverName);
+      const approver = users.find(
+        (u) =>
+          parseInt(u.dataValues.user_id) === parseInt(paymentData.approvedBy)
+      );
 
-      console.log("username", username);
       return {
-        ...payment.dataValues,
-        companyName: company ? company.company_name : "Unknown",
-        username: username ? username : "Unknown",
-        approverName: approverName ? approverName : "Unknown",
+        ...paymentData,
+        companyName: company?.dataValues.company_name || "Unknown",
+        username: createdByUser?.dataValues.full_Name || "Unknown",
+        approverName: approver?.dataValues.full_Name || "N/A",
       };
     });
 
-    res.json(createSuccess("Payments fetched successfully", allPayments));
+    return res.json(
+      createSuccess("Payments fetched successfully", allPayments)
+    );
   } catch (error) {
-    res
-      .status(500)
-      .json({error: "Failed to fetch payments", details: error.message});
+    console.error("Error in getAllPayments:", error);
+    return res.status(500).json({
+      error: "Failed to fetch payments",
+      details: error.message,
+    });
   }
 };
 

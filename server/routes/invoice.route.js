@@ -11,7 +11,7 @@ const logMiddleware = require("../utils/log");
 const verifyToken = require("../utils/verifyToken");
 const router = express.Router();
 
-router.get("/allInvoices", verifyToken, logMiddleware, getAllInvoices);
+router.get("/allInvoices/:start", verifyToken, logMiddleware, getAllInvoices);
 router.get(
   "/getInvoiceById/:invoiceId",
   verifyToken,

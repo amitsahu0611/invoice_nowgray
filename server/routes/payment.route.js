@@ -16,7 +16,7 @@ const router = express.Router();
 router.post("/createPayment", verifyToken, logMiddleware, createPayment);
 router.put("/updatePayment/:id", verifyToken, logMiddleware, updatePayment);
 router.get("/getPaymentById/:id", verifyToken, logMiddleware, getPaymentById);
-router.get("/getAllPayment", verifyToken, logMiddleware, getAllPayments);
+router.get("/getAllPayment/:start", verifyToken, logMiddleware, getAllPayments);
 router.get("/getMonthlyPaymentSummary", getMonthlyPaymentSummary);
 
 router.put(

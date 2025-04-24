@@ -18,9 +18,9 @@ export const createClient = createAsyncThunk(
 
 export const getAllClients = createAsyncThunk(
   "getAllClients",
-  async (thunkAPI) => {
+  async (start, thunkAPI) => {
     try {
-      const response = await axiosInstance.get(`client/getAllClients`);
+      const response = await axiosInstance.get(`client/getAllClients/${start}`);
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});

@@ -15,7 +15,12 @@ const verifyToken = require("../utils/verifyToken");
 const router = express.Router();
 
 router.post("/createQuotation", verifyToken, logMiddleware, createQuotation);
-router.get("/getAllQuotations", verifyToken, logMiddleware, getAllQuotations);
+router.get(
+  "/getAllQuotations/:start",
+  verifyToken,
+  logMiddleware,
+  getAllQuotations
+);
 router.get(
   "/getQuotationById/:id",
   verifyToken,

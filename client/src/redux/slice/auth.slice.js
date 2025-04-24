@@ -25,14 +25,17 @@ export const createUser = createAsyncThunk(
   }
 );
 
-export const getAllUsers = createAsyncThunk("getAllUsers", async (thunkAPI) => {
-  try {
-    const response = await axiosInstance.get(`user/getAllStaffs`);
-    return response.data;
-  } catch (error) {
-    return thunkAPI.rejectWithValue({error: error.message});
+export const getAllUsers = createAsyncThunk(
+  "getAllUsers",
+  async (start, thunkAPI) => {
+    try {
+      const response = await axiosInstance.get(`user/getAllStaffs/${start}`);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue({error: error.message});
+    }
   }
-});
+);
 
 export const getUserById = createAsyncThunk(
   "getUserById",
@@ -69,7 +72,7 @@ const authSlice = createSlice({
   },
   reducers: {
     clearStaffData: (state) => {
-      state.singleStaff = null;
+      state.singleStaff = {};
     },
   },
 

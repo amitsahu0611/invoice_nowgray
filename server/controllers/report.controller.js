@@ -112,9 +112,16 @@ const createDownloadLog = async (req, res) => {
 };
 
 const getAllDownloadLogs = async (req, res) => {
+  const {start} = req.params;
   try {
     const logs = await DownloadLog.findAll({
       order: [["downloadedAt", "DESC"]],
+      ...(Number.isNaN(Number(start)) || start === undefined
+        ? {} // If start is NaN or undefined, no offset/limit
+        : {
+            offset: (start - 1) * 15,
+            limit: 15,
+          }),
     });
 
     res.status(200).json({
@@ -131,9 +138,17 @@ const getAllDownloadLogs = async (req, res) => {
 };
 
 const getAllMethodLogs = async (req, res) => {
+  const {start} = req.params;
   try {
     const logs = await Log.findAll({
       order: [["createdAt", "DESC"]],
+
+      ...(Number.isNaN(Number(start)) || start === undefined
+        ? {} // If start is NaN or undefined, no offset/limit
+        : {
+            offset: start * 15,
+            limit: 15,
+          }),
     });
 
     res.status(200).json({

@@ -11,7 +11,7 @@ const {
 const router = express.Router();
 
 router.post("/createClient", createClient);
-router.get("/getAllClients", getAllClients);
+router.get("/getAllClients/:start", getAllClients);
 router.get("/getClientById/:id", getClientById);
 router.put("/updateClient/:id", updateClient);
 

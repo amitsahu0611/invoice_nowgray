@@ -2,7 +2,11 @@
 
 import React, {useEffect, useState} from "react";
 import {showError, showSuccess} from "../../utils/config";
-import {createCompany, updateCompany} from "../redux/slice/company.slice";
+import {
+  clearCompany,
+  createCompany,
+  updateCompany,
+} from "../redux/slice/company.slice";
 import {useDispatch, useSelector} from "react-redux";
 
 const CreateCompany = ({setActiveTab}) => {
@@ -13,7 +17,7 @@ const CreateCompany = ({setActiveTab}) => {
   const dispatch = useDispatch();
 
   const [form, setForm] = useState({
-    prefix: "",
+    company_prefix: "",
     name: "",
     email: "",
     color: "#000000", // Default color
@@ -31,7 +35,7 @@ const CreateCompany = ({setActiveTab}) => {
     if (companyData) {
       setForm((prev) => ({
         ...prev,
-        prefix: companyData?.prefix || "",
+        company_prefix: companyData?.company_prefix || "",
         name: companyData?.company_name || "",
         email: companyData?.company_email || "",
         phone: companyData?.company_phone || "",
@@ -52,7 +56,7 @@ const CreateCompany = ({setActiveTab}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const {name, email, phone, address, website, prefix} = form;
+    const {name, email, phone, address, website, company_prefix} = form;
     console.log("form", form);
     if (name && email && phone && address && website) {
       const result = await dispatch(createCompany(form));
@@ -77,7 +81,7 @@ const CreateCompany = ({setActiveTab}) => {
 
   const handleCancel = () => {
     setForm({
-      prefix: "",
+      company_prefix: "",
       name: "",
       email: "",
       color: "#000000",
@@ -88,6 +92,7 @@ const CreateCompany = ({setActiveTab}) => {
       website: "",
       status: "active",
     });
+    dispatch(clearCompany());
     setUpdate(false);
   };
 
@@ -119,8 +124,8 @@ const CreateCompany = ({setActiveTab}) => {
           <input
             type='text'
             placeholder='Enter Company Prefix'
-            value={form.name}
-            onChange={(e) => handleChange("prefix", e.target.value)}
+            value={form.company_prefix}
+            onChange={(e) => handleChange("company_prefix", e.target.value)}
             required
             className='border border-gray-300 rounded-md px-3 py-2'
           />
@@ -275,7 +280,7 @@ const CreateCompany = ({setActiveTab}) => {
         >
           Cancel
         </button>
-        {update ? (
+        {companyData && Object.keys(companyData).length > 0 ? (
           <button
             type='submit'
             onClick={handleUpdate}
@@ -292,6 +297,9 @@ const CreateCompany = ({setActiveTab}) => {
             Add Company
           </button>
         )}
+      </div>
+      <div className='text-center text-sm text-green-700 italic'>
+        To create a new company please click on cancel button
       </div>
     </div>
   );

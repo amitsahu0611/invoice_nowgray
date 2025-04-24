@@ -15,10 +15,11 @@ export default function MethodLogs({setActiveTab}) {
   const [logs, setLogs] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedData, setSelectedData] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    dispatch(getAllMethodLogs());
-  }, []);
+    dispatch(getAllMethodLogs(currentPage));
+  }, [currentPage]);
 
   useEffect(() => {
     if (allLogs?.length > 0) {
@@ -40,18 +41,11 @@ export default function MethodLogs({setActiveTab}) {
   const handleDownload = () => {
     if (logs.length === 0) return;
 
-    const exportData = logs.map(({method, route, requestData, timestamp}) => ({
-      Method: method,
-      Route: route,
-      "Requested Data": requestData,
-      Timestamp: new Date(timestamp).toLocaleString(),
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const worksheet = XLSX.utils.json_to_sheet(logs);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "MethodLogs");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "logs");
 
-    XLSX.writeFile(workbook, "MethodLogs.xlsx");
+    XLSX.writeFile(workbook, "logs.xlsx");
   };
 
   const handleCloseModal = () => {
@@ -122,8 +116,39 @@ export default function MethodLogs({setActiveTab}) {
               </td>
             </tr>
           ))}
+          {filteredRows?.length === 0 && (
+            <tr>
+              <td colSpan={11} className='p-4 text-center text-gray-500'>
+                No Logs found
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+      <div className='flex justify-center items-center p-4 border-t bg-white'>
+        <div className='flex items-center space-x-2'>
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className={`px-4 py-2 text-sm rounded transition ${
+              currentPage === 1
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Prev
+          </button>
+          <button className='px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded shadow'>
+            {currentPage}
+          </button>
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className='px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition'
+          >
+            Next
+          </button>
+        </div>
+      </div>
 
       {/* Modal */}
       {selectedData && (

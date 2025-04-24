@@ -36,12 +36,13 @@ export default function ApprovedPayment({setActiveTab}) {
   const [payments, setPayments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const allPayments = useSelector((state) => state.payment.allPayments);
 
   useEffect(() => {
-    dispatch(getAllPayment());
-  }, []);
+    dispatch(getAllPayment(currentPage));
+  }, [currentPage]);
 
   const [userData, setUserData] = useState({});
 
@@ -189,8 +190,40 @@ export default function ApprovedPayment({setActiveTab}) {
               </tr>
             );
           })}
+          {payments?.length === 0 && (
+            <tr>
+              <td colSpan={11} className='p-4 text-center text-gray-500'>
+                No Payment found
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+      <div className='flex justify-center items-center p-4 border-t bg-white'>
+        <div className='flex items-center space-x-2'>
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className={`px-4 py-2 text-sm rounded transition ${
+              currentPage === 1
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Prev
+          </button>
+          <button className='px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded shadow'>
+            {currentPage}
+          </button>
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className='px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition'
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
       {showModal && (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30'>
           <div className='bg-white p-6 rounded-lg shadow-lg max-w-sm w-full'>

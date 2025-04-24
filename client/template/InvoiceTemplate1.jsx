@@ -272,6 +272,21 @@ const InvoiceTemplate1 = ({invoiceData, download}) => {
     startDownload();
   }, [download]);
 
+  const totalBeforeDiscount = invoiceData?.items?.reduce((acc, item) => {
+    return acc + parseFloat(item.total_price || 0);
+  }, 0);
+
+  let discountAmount = 0;
+  if (invoiceData?.discountType === "percent") {
+    discountAmount = (totalBeforeDiscount * invoiceData.discountValue) / 100;
+  } else if (invoiceData?.discountType === "amount") {
+    discountAmount = parseFloat(invoiceData.discountValue || 0);
+  }
+
+  const discountedTotal = totalBeforeDiscount - discountAmount;
+  const gstAmount = (discountedTotal * (invoiceData?.tax_percent || 0)) / 100;
+  const finalPayable = discountedTotal + gstAmount;
+
   return (
     <div>
       <div
@@ -404,11 +419,6 @@ const InvoiceTemplate1 = ({invoiceData, download}) => {
           </p>
         </div>
 
-        <div className='text-right mb-2 mt-4'>
-          <span className='ml-5 font-bold'>
-            Subtotal: ₹ {invoiceData?.total_amount || 0.0}
-          </span>
-        </div>
         {invoiceData?.discountType && invoiceData?.discountValue && (
           <div className='text-right mb-2 mt-4'>
             <span className='ml-5 font-bold'>
@@ -424,10 +434,11 @@ const InvoiceTemplate1 = ({invoiceData, download}) => {
           <span className='text-yellow-500 font-bold'>
             GST ({invoiceData?.tax_percent || 0}%)
           </span>
+          <span className='ml-5 font-bold'>₹ {gstAmount}</span>
+        </div>
+        <div className='text-right mb-2 mt-4'>
           <span className='ml-5 font-bold'>
-            ₹{" "}
-            {(invoiceData?.tax_percent / 100) *
-              parseInt(invoiceData?.total_amount || 0) || 0.0}
+            Subtotal: ₹ {invoiceData?.total_amount || 0.0}
           </span>
         </div>
 
@@ -449,12 +460,7 @@ const InvoiceTemplate1 = ({invoiceData, download}) => {
           </div>
           <div className='border-2 border-black p-3 w-1/2 ml-2 text-right'>
             <p className='font-bold'>Total Payable (Incl. GST)</p>
-            <h2 className='text-2xl font-bold mt-2'>
-              ₹{" "}
-              {parseInt(invoiceData?.total_amount || 0) +
-                (invoiceData?.tax_percent / 100) *
-                  parseInt(invoiceData?.total_amount || 0) || 0.0}
-            </h2>
+            <h2 className='text-2xl font-bold mt-2'>₹ {finalPayable}</h2>
           </div>
         </div>
       </div>

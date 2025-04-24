@@ -18,9 +18,11 @@ export const createCompany = createAsyncThunk(
 
 export const getAllCompany = createAsyncThunk(
   "getAllCompany",
-  async (thunkAPI) => {
+  async (start, thunkAPI) => {
     try {
-      const response = await axiosInstance.get(`company/getAllCompanies`);
+      const response = await axiosInstance.get(
+        `company/getAllCompanies/${start}`
+      );
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});
@@ -63,7 +65,11 @@ const companySlice = createSlice({
     allCompanies: [],
     singleCompanyData: {},
   },
-  reducers: {},
+  reducers: {
+    clearCompany: (state, action) => {
+      state.singleCompanyData = {};
+    },
+  },
 
   extraReducers: (builder) => {
     builder
@@ -96,3 +102,4 @@ const companySlice = createSlice({
 
 // Export the reducer and actions
 export default companySlice.reducer;
+export const {clearCompany} = companySlice.actions;

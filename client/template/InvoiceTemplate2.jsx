@@ -58,6 +58,21 @@ const InvoiceTemplate2 = ({invoiceData, download}) => {
     }
   }, [download]);
 
+  const totalBeforeDiscount = invoiceData?.items?.reduce((acc, item) => {
+    return acc + parseFloat(item.total_price || 0);
+  }, 0);
+
+  let discountAmount = 0;
+  if (invoiceData?.discountType === "percent") {
+    discountAmount = (totalBeforeDiscount * invoiceData.discountValue) / 100;
+  } else if (invoiceData?.discountType === "amount") {
+    discountAmount = parseFloat(invoiceData.discountValue || 0);
+  }
+
+  const discountedTotal = totalBeforeDiscount - discountAmount;
+  const gstAmount = (discountedTotal * (invoiceData?.tax_percent || 0)) / 100;
+  const finalPayable = discountedTotal + gstAmount;
+
   return (
     <div>
       <div
@@ -227,11 +242,7 @@ const InvoiceTemplate2 = ({invoiceData, download}) => {
               )}
               <tr>
                 <td className='text-sm'>GST ({invoiceData?.tax_percent}%)</td>
-                <td className='text-sm text-right'>
-                  ₹{" "}
-                  {(invoiceData?.tax_percent / 100) *
-                    invoiceData?.total_amount || 0.0}
-                </td>
+                <td className='text-sm text-right'>₹ {gstAmount}</td>
               </tr>
               <tr>
                 <td className='text-sm font-semibold'>Total</td>
@@ -246,10 +257,7 @@ const InvoiceTemplate2 = ({invoiceData, download}) => {
             <div className='flex justify-between border-t-2 border-blue-900 mt-4 pt-4'>
               <span className='text-blue-900 font-semibold'>Total-</span>
               <span className='text-blue-900 font-semibold'>
-                ₹
-                {parseInt(invoiceData?.total_amount) +
-                  (invoiceData?.tax_percent / 100) *
-                    invoiceData?.total_amount || 0.0}
+                ₹{finalPayable || 0.0}
               </span>
             </div>
           </div>

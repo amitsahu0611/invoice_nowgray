@@ -97,6 +97,7 @@ const createUser = async (req, res) => {
 };
 
 const getAllStaffs = async (req, res) => {
+  const {start} = req.params;
   try {
     const companies = await Company.findAll({raw: true});
 
@@ -104,7 +105,15 @@ const getAllStaffs = async (req, res) => {
       where: {
         is_deleted: false,
       },
+      ...(Number.isNaN(Number(start)) || start === undefined
+        ? {} // If start is NaN or undefined, no offset/limit
+        : {
+            offset: (start - 1) * 15,
+            limit: 15,
+          }),
     });
+
+    console.log("staffs", staffs);
 
     const staffsWithCompany = staffs.map((staff) => {
       const company = companies.find((c) => c.company_id === staff.company_id);

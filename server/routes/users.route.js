@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.post("/login", logMiddleware, login);
 router.post("/createUser", verifyToken, logMiddleware, createUser);
-router.get("/getAllStaffs", verifyToken, logMiddleware, getAllStaffs);
+router.get("/getAllStaffs/:start", verifyToken, logMiddleware, getAllStaffs);
 router.get("/getUserById/:id", verifyToken, logMiddleware, getUserById);
 router.put("/updateUsers/:id", verifyToken, logMiddleware, updateUserById);
 

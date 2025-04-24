@@ -33,12 +33,13 @@ export default function ClientList({setActiveTab}) {
   const dispatch = useDispatch();
   const allClients = useSelector((state) => state.client.allClients);
   console.log("allClients", allClients);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [clients, setAllClients] = useState([]);
 
   useEffect(() => {
-    dispatch(getAllClients());
-  }, []);
+    dispatch(getAllClients(currentPage));
+  }, [currentPage]);
 
   useEffect(() => {
     if (allClients?.length > 0) {
@@ -86,6 +87,16 @@ export default function ClientList({setActiveTab}) {
     }
   };
 
+  const handleExport = () => {
+    if (clients?.length === 0) return;
+
+    const worksheet = XLSX.utils.json_to_sheet(clients);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "clients");
+
+    XLSX.writeFile(workbook, "Clients.xlsx");
+  };
+
   return (
     <div className='overflow-hidden rounded-lg border bg-white shadow-md'>
       <div className='flex items-center justify-between p-4 border-b'>
@@ -103,7 +114,7 @@ export default function ClientList({setActiveTab}) {
             />
           </div>
           <button
-            onClick={handleDownload}
+            onClick={handleExport}
             className='flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-blue-600 border-blue-600 hover:bg-blue-100'
           >
             <Download className='w-4 h-4' />
@@ -160,8 +171,39 @@ export default function ClientList({setActiveTab}) {
               </tr>
             );
           })}
+          {filteredRows?.length === 0 && (
+            <tr>
+              <td colSpan={11} className='p-4 text-center text-gray-500'>
+                No Clients found
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+      <div className='flex justify-center items-center p-4 border-t bg-white'>
+        <div className='flex items-center space-x-2'>
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className={`px-4 py-2 text-sm rounded transition ${
+              currentPage === 1
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Prev
+          </button>
+          <button className='px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded shadow'>
+            {currentPage}
+          </button>
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className='px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition'
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -17,9 +17,11 @@ export const getPaymentReport = createAsyncThunk(
 
 export const allDownloadLog = createAsyncThunk(
   "allDownloadLog",
-  async (thunkAPI) => {
+  async (start, thunkAPI) => {
     try {
-      const response = await axiosInstance.get(`report/getAllDownloadLogs`);
+      const response = await axiosInstance.get(
+        `report/getAllDownloadLogs/${start}`
+      );
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});
@@ -29,9 +31,11 @@ export const allDownloadLog = createAsyncThunk(
 
 export const getAllMethodLogs = createAsyncThunk(
   "getAllMethodLogs",
-  async (thunkAPI) => {
+  async (start, thunkAPI) => {
     try {
-      const response = await axiosInstance.get(`report/getAllMethodLogs`);
+      const response = await axiosInstance.get(
+        `report/getAllMethodLogs/${start}`
+      );
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue({error: error.message});

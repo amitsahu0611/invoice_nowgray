@@ -4,6 +4,7 @@ import React, {useEffect, useState} from "react";
 import {Download, Search, Pencil} from "lucide-react";
 import {useDispatch, useSelector} from "react-redux";
 import {getAllCompany, getCompanyById} from "../redux/slice/company.slice";
+import * as XLSX from "xlsx";
 import {setActive} from "@material-tailwind/react/components/Tabs/TabsContext";
 
 const TABLE_HEAD = [
@@ -31,13 +32,14 @@ export default function CompanyList({setActiveTab}) {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [allCompanies, setAllCompanies] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const companies = useSelector((state) => state.company.allCompanies);
   console.log("allCompanies", allCompanies);
 
   useEffect(() => {
-    dispatch(getAllCompany());
-  }, []);
+    dispatch(getAllCompany(currentPage));
+  }, [currentPage]);
 
   useEffect(() => {
     if (companies?.length > 0) {
@@ -62,6 +64,27 @@ export default function CompanyList({setActiveTab}) {
     }
   };
 
+  const handleExport = () => {
+    if (staffs.length === 0) return;
+
+    // Define the fields you want to include in the Excel file
+    const exportData = staffs.map(
+      ({full_Name, company_name, mobile, email, is_active}) => ({
+        "Staff Name": full_Name,
+        "Company Name": company_name,
+        Phone: mobile,
+        Email: email,
+        Status: is_active ? "Active" : "Inactive",
+      })
+    );
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "StaffList");
+
+    XLSX.writeFile(workbook, "StaffList.xlsx");
+  };
+
   return (
     <div className='overflow-hidden rounded-lg mt-9 border bg-white shadow-md'>
       <div className='flex items-center justify-between p-4 border-b'>
@@ -78,7 +101,10 @@ export default function CompanyList({setActiveTab}) {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className='flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-blue-600 border-blue-600 hover:bg-blue-100'>
+          <button
+            onClick={handleExport}
+            className='flex items-center gap-2 px-4 py-2 border rounded-md text-sm text-blue-600 border-blue-600 hover:bg-blue-100'
+          >
             <Download className='w-4 h-4' />
             Download
           </button>
@@ -134,8 +160,39 @@ export default function CompanyList({setActiveTab}) {
               </tr>
             );
           })}
+          {filteredRows?.length === 0 && (
+            <tr>
+              <td colSpan={11} className='p-4 text-center text-gray-500'>
+                No Company found
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+      <div className='flex justify-center items-center p-4 border-t bg-white'>
+        <div className='flex items-center space-x-2'>
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            className={`px-4 py-2 text-sm rounded transition ${
+              currentPage === 1
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Prev
+          </button>
+          <button className='px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded shadow'>
+            {currentPage}
+          </button>
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            className='px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition'
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

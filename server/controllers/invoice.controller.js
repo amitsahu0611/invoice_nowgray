@@ -8,7 +8,15 @@ const {createSuccess} = require("../utils/response");
 
 const getAllInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.findAll();
+    const {start} = req.params;
+    const invoices = await Invoice.findAll({
+      ...(Number.isNaN(Number(start)) || start === undefined
+        ? {} // If start is NaN or undefined, no offset/limit
+        : {
+            offset: (start - 1) * 15,
+            limit: 15,
+          }),
+    });
 
     const invoicesWithPayments = [];
 

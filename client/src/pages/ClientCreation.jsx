@@ -168,7 +168,7 @@ const ClientCreation = ({setActiveTab}) => {
   return (
     <div className='w-full max-w-8xl mx-auto mt-10 shadow-lg p-8 bg-white rounded-lg'>
       <h2 className='text-2xl font-semibold text-blue-gray-700 mb-6'>
-        {update ? "Update" : "Add New"} client
+        Add New client
       </h2>
 
       <form
@@ -378,6 +378,9 @@ const ClientCreation = ({setActiveTab}) => {
         >
           Add Client
         </button>
+      </div>
+      <div className='text-center text-sm text-green-700 italic'>
+        To create a new client please click on cancel button
       </div>
     </div>
   );
