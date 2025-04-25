@@ -20,7 +20,7 @@ const TABLE_HEAD = [
   "Total Amount",
   "Total Amount Paid",
   "Left Amount",
-  "No of Payments",
+  // "No of Payments",
   "Status",
   "Sales Person",
 ];
@@ -152,7 +152,7 @@ export default function PaymentReport({setActiveTab}) {
                   {quote?.totalAmountPaidForInvoice}
                 </td>
                 <td className='p-4 text-sm'>{quote?.leftAmount}</td>
-                <td className='p-4 text-sm'>₹{quote?.amount}</td>
+                {/* <td className='p-4 text-sm'>₹{quote?.amount}</td> */}
                 <td className='p-4 text-sm'>{"-"}</td>
                 <td className='p-4 text-sm'>{quote?.username}</td>
               </tr>

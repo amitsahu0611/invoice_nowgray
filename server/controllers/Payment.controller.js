@@ -150,6 +150,7 @@ const getAllPayments = async (req, res) => {
 
     const companies = await Company.findAll({order: [["createdAt", "DESC"]]});
     const users = await Users.findAll({order: [["createdAt", "DESC"]]});
+    const invoices = await Invoice.findAll({order: [["createdAt", "DESC"]]});
 
     // Now enrich payments
     const allPayments = payments.map((payment) => {
@@ -169,11 +170,17 @@ const getAllPayments = async (req, res) => {
           parseInt(u.dataValues.user_id) === parseInt(paymentData.approvedBy)
       );
 
+      const invoice_number = invoices.find(
+        (u) =>
+          parseInt(u.dataValues.invoice_id) === parseInt(paymentData.invoiceId)
+      );
+
       return {
         ...paymentData,
         companyName: company?.dataValues.company_name || "Unknown",
         username: createdByUser?.dataValues.full_Name || "Unknown",
         approverName: approver?.dataValues.full_Name || "N/A",
+        invoice_number: invoice_number?.dataValues?.invoice_no || "N/A",
       };
     });
 

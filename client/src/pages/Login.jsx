@@ -3,14 +3,11 @@
 import React, {useState} from "react";
 import {login} from "../redux/slice/auth.slice";
 import {useDispatch} from "react-redux";
-import {showSuccess} from "../../utils/config";
-
-import {Eye, EyeOff} from "lucide-react"; // 👈 replace react-icons with this
+import {showError, showSuccess} from "../../utils/config";
+import {Eye, EyeOff} from "lucide-react";
 
 const Login = () => {
   const dispatch = useDispatch();
-
-  // Inside the component
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -28,7 +25,6 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = await dispatch(login(formData));
-    console.log("data", data);
     if (data?.payload?.status == 1) {
       showSuccess("Login Successful");
       localStorage.setItem("token", data?.payload?.result?.authToken);
@@ -37,12 +33,22 @@ const Login = () => {
         JSON.stringify(data?.payload?.result?.user)
       );
       window.location.href = "/dashboard";
+    } else {
+      showError(data?.payload?.message);
     }
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gray-100 px-4'>
-      <div className='w-full max-w-md bg-white border border-gray-200 rounded-xl shadow-lg p-8'>
+    <div className='relative min-h-screen flex items-center justify-center bg-gray-100 px-4 overflow-hidden'>
+      {/* Floating background logo */}
+      <img
+        src='/logo.png' // 👈 replace with your actual logo path
+        alt='Company Logo'
+        className='absolute w-96 opacity-10 animate-float-slow pointer-events-none select-none'
+        style={{zIndex: 0}}
+      />
+
+      <div className='relative w-full max-w-md bg-white border border-gray-200 rounded-xl shadow-lg p-8 z-10'>
         <h2 className='text-3xl font-bold text-center text-gray-800 mb-6'>
           Welcome Back 👋
         </h2>
@@ -92,7 +98,7 @@ const Login = () => {
           </button>
         </form>
         <p className='mt-6 text-sm text-center text-gray-600'>
-          Powered by Nowgray ❤️{" "}
+          Powered by Nowgray ❤️
         </p>
       </div>
     </div>

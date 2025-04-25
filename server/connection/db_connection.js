@@ -1,4 +1,6 @@
-const { Sequelize } = require("sequelize");
+/** @format */
+
+const {Sequelize} = require("sequelize");
 const dotenv = require("dotenv");
 const colors = require("colors");
 
@@ -7,12 +9,12 @@ dotenv.config({
 });
 
 const db = new Sequelize(
-  process.env.DATABASE_NAME,
-  process.env.USER_NAME,
-  process.env.PASSWORD,
+  "jasminz_invoice_db",
+  "jasminz_new_user_invoice",
+  "Nowgray@2025",
   {
-    host: process.env.HOST_NAME,
-    port: process.env.DB_PORT,
+    host: "66.103.193.120",
+    port: "3306",
     dialect: "mysql",
     logging: false,
   }

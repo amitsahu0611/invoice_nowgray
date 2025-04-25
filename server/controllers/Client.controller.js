@@ -14,17 +14,17 @@ const createClient = async (req, res) => {
       },
     });
     if (existing) {
-      res.json(createError("Email already exists"));
+      return res.json(createError("Email already exists"));
     }
     const client = await Client.create(req.body);
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Client created successfully",
       data: client,
     });
   } catch (error) {
     console.error("Error creating client:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to create client",
       error: error.message,

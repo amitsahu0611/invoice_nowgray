@@ -108,7 +108,7 @@ const InvoiceTemplate2 = ({invoiceData, download}) => {
           <div className='flex justify-end mt-0'>
             <img
               style={{width: "35%"}}
-              src={`http://localhost:5173/logo/Nowgray.png`}
+              src={`${forImage}/logo/Nowgray.png`}
               alt='Nowgray'
               onLoad={() => console.log("Image loaded")}
             />

@@ -57,7 +57,10 @@ const CreateStaff = ({setActiveTab}) => {
   // Set companies list after fetching data
   useEffect(() => {
     if (allCompanies?.length > 0) {
-      setCompanies(allCompanies);
+      const filteredCompanies = allCompanies.filter(
+        (company) => company?.status == "active"
+      );
+      setCompanies(filteredCompanies);
     }
   }, [allCompanies]);
 

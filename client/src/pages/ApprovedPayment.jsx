@@ -60,7 +60,10 @@ export default function ApprovedPayment({setActiveTab}) {
 
   useEffect(() => {
     if (allPayments?.length > 0) {
-      setPayments(allPayments);
+      const filtered = allPayments?.filter(
+        (payment) => payment.approvedBy != null
+      );
+      setPayments(filtered);
     }
   }, [allPayments]);
 

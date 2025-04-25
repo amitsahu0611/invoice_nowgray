@@ -23,7 +23,8 @@ const createQuotation = async (req, res) => {
       items = [],
     } = req.body;
 
-    req.body.salesPersonId = 1;
+    req.body.salesPersonId = salesPersonId;
+    req.body.company_id = company_id;
 
     if (
       isEmpty(invoice_no) ||

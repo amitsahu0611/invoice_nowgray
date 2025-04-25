@@ -28,7 +28,6 @@ const Invoice = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-
     category: {
       type: DataTypes.STRING,
       allowNull: true,

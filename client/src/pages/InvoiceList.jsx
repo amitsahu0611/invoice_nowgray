@@ -19,7 +19,7 @@ import InvoiceTemplate2 from "../../template/InvoiceTemplate2";
 import {createDownloadLog} from "../redux/slice/reports.slice";
 
 const TABLE_HEAD = [
-  "Invoice ID",
+  "S. No",
   "Invoice No",
   "Customer Name",
   "Phone",
@@ -201,7 +201,7 @@ export default function InvoiceList({setActiveTab}) {
         downloadedAt: new Date(),
         downloaderRole: userData.role_id,
         downloaderName: userData.full_Name,
-        type: "quotation",
+        type: "invoice",
         downloadedBy: userData.user_id,
       };
       dispatch(createDownloadLog(objReq));

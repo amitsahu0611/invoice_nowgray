@@ -25,6 +25,7 @@ const ClientCreation = ({setActiveTab}) => {
 
   const [form, setForm] = useState({
     company_id: "",
+    client_company: "",
     client_name: "",
     client_phone: "",
     client_email: "",
@@ -32,6 +33,9 @@ const ClientCreation = ({setActiveTab}) => {
     client_city: "",
     client_district: "",
     client_house_no: "",
+    pan_number: "",
+    client_gst: "",
+    pan_code: "",
     is_active: true,
   });
 
@@ -41,6 +45,7 @@ const ClientCreation = ({setActiveTab}) => {
     if (clientData) {
       setForm((prev) => ({
         ...prev,
+        client_company: clientData?.client_company || "",
         company_id: clientData?.company_id || "",
         client_name: clientData?.client_name || "",
         client_phone: clientData?.client_phone || "",
@@ -50,6 +55,9 @@ const ClientCreation = ({setActiveTab}) => {
         client_district: clientData?.client_district || "",
         client_house_no: clientData?.client_house_no || "",
         is_active: clientData?.is_active ?? true,
+        pan_number: clientData?.pan_number || "",
+        client_gst: clientData?.client_gst || "",
+        pan_code: clientData?.pan_code || "",
       }));
       setClientId(clientData?.client_id);
       setUpdate(true);
@@ -62,7 +70,10 @@ const ClientCreation = ({setActiveTab}) => {
 
   useEffect(() => {
     if (allCompanies?.length > 0) {
-      setCompanies(allCompanies);
+      const filteredCompanies = allCompanies.filter(
+        (company) => company?.status == "active"
+      );
+      setCompanies(filteredCompanies);
     }
   }, [allCompanies]);
 
@@ -90,6 +101,7 @@ const ClientCreation = ({setActiveTab}) => {
     if (data?.payload?.success) {
       setForm((prev) => ({
         ...prev,
+        client_company: "",
         company_id: "",
         client_name: "",
         client_phone: "",
@@ -98,6 +110,9 @@ const ClientCreation = ({setActiveTab}) => {
         client_city: "",
         client_district: "",
         client_house_no: "",
+        pan_number: "",
+        client_gst: "",
+        pan_code: "",
         is_active: true,
       }));
       setActiveTab("Client List");
@@ -114,6 +129,7 @@ const ClientCreation = ({setActiveTab}) => {
       updateClient({
         id: clientId,
         data: {
+          client_company: form?.client_company || "",
           company_id: form?.company_id || "",
           client_name: form?.client_name || "",
           client_phone: form?.client_phone || "",
@@ -122,6 +138,9 @@ const ClientCreation = ({setActiveTab}) => {
           client_city: form?.client_city || "",
           client_district: form?.client_district || "",
           client_house_no: form?.client_house_no || "",
+          pan_number: form?.pan_number || "",
+          client_gst: form?.client_gst || "",
+          pan_code: form?.pan_code || "",
           is_active: form?.is_active ?? true,
         },
       })
@@ -133,6 +152,7 @@ const ClientCreation = ({setActiveTab}) => {
       setForm((prev) => ({
         ...prev,
         company_id: "",
+        client_company: "",
         client_name: "",
         client_phone: "",
         client_email: "",
@@ -140,6 +160,9 @@ const ClientCreation = ({setActiveTab}) => {
         client_city: "",
         client_district: "",
         client_house_no: "",
+        pan_number: "",
+        client_gst: "",
+        pan_code: "",
         is_active: true,
       }));
       setActiveTab("Client List");
@@ -154,10 +177,14 @@ const ClientCreation = ({setActiveTab}) => {
       ...prev,
       company_id: "",
       client_name: "",
+      client_company: "",
       client_phone: "",
       client_email: "",
       client_street: "",
       client_city: "",
+      pan_number: "",
+      client_gst: "",
+      pan_code: "",
       client_district: "",
       client_house_no: "",
       is_active: true,
@@ -168,7 +195,9 @@ const ClientCreation = ({setActiveTab}) => {
   return (
     <div className='w-full max-w-8xl mx-auto mt-10 shadow-lg p-8 bg-white rounded-lg'>
       <h2 className='text-2xl font-semibold text-blue-gray-700 mb-6'>
-        Add New client
+        {clientData && Object.keys(clientData).length > 0
+          ? "Update Client"
+          : "Add Client"}
       </h2>
 
       <form
@@ -202,9 +231,23 @@ const ClientCreation = ({setActiveTab}) => {
           </label>
           <input
             type='text'
-            placeholder='Enter Name'
+            placeholder='Enter Client Name'
             value={form.client_name}
             onChange={(e) => handleChange("client_name", e.target.value)}
+            required
+            className='border border-gray-300 rounded-md px-3 py-2'
+          />
+        </div>
+
+        <div className='flex flex-col'>
+          <label className='mb-1 text-sm font-medium text-gray-700'>
+            Client Company Name
+          </label>
+          <input
+            type='text'
+            placeholder='Enter Customer Company Name'
+            value={form.client_company}
+            onChange={(e) => handleChange("client_company", e.target.value)}
             required
             className='border border-gray-300 rounded-md px-3 py-2'
           />
@@ -371,13 +414,23 @@ const ClientCreation = ({setActiveTab}) => {
         >
           Cancel
         </button>
-        <button
-          type='submit'
-          onClick={handleSubmit}
-          className='bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700'
-        >
-          Add Client
-        </button>
+        {clientData && Object.keys(clientData).length > 0 ? (
+          <button
+            type='submit'
+            onClick={handleUpdate}
+            className='bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700'
+          >
+            Update Client
+          </button>
+        ) : (
+          <button
+            type='submit'
+            onClick={handleSubmit}
+            className='bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700'
+          >
+            Add Client
+          </button>
+        )}
       </div>
       <div className='text-center text-sm text-green-700 italic'>
         To create a new client please click on cancel button

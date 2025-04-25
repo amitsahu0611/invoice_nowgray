@@ -8,13 +8,16 @@ import {createQuotation} from "../redux/slice/quotation.slice";
 import {useDispatch, useSelector} from "react-redux";
 import {getUserData, showSuccess} from "../../utils/config";
 import {getAllClients} from "../redux/slice/client.slice";
+import {getAllCompany} from "../redux/slice/company.slice";
 
 const QuotationForm = ({setActiveTab}) => {
   const quotationData = useSelector(
     (state) => state.quotation.singleQuotationData
   );
+  const allCompanies = useSelector((state) => state.company.allCompanies);
 
   const [userData, setUserData] = useState({});
+  const [companies, setCompanies] = useState([]);
 
   console.log("userData", userData);
 
@@ -24,9 +27,9 @@ const QuotationForm = ({setActiveTab}) => {
       console.log("data", data);
       setUserData(data);
     };
-
     fetchData();
   }, []);
+
   console.log("quotationData", quotationData);
 
   const allClients = useSelector((state) => state.client.allClients);
@@ -39,8 +42,24 @@ const QuotationForm = ({setActiveTab}) => {
   }, []);
 
   useEffect(() => {
+    dispatch(getAllCompany());
+  }, []);
+
+  useEffect(() => {
+    if (allCompanies?.length > 0) {
+      const filteredCompanies = allCompanies.filter(
+        (company) => company?.status == "active"
+      );
+      setCompanies(filteredCompanies);
+    }
+  }, [allCompanies]);
+
+  useEffect(() => {
     if (allClients?.length > 0) {
-      setAllClients(allClients);
+      const filteredClients = allClients?.filter(
+        (client) => client?.is_active == 1
+      );
+      setAllClients(filteredClients);
     }
   }, [allClients]);
 
@@ -49,6 +68,7 @@ const QuotationForm = ({setActiveTab}) => {
   const [updated, setUpdated] = useState(false);
   const [prefix, setPrefix] = useState("");
   const [formValues, setFormValues] = useState({
+    company_id: null,
     client_id: null,
     category: "Design Services",
     invoice_no: "NG00906",
@@ -173,6 +193,7 @@ const QuotationForm = ({setActiveTab}) => {
   };
 
   const handleChange = (e) => {
+    console.log("dfssdfsdf", e.target.value);
     const {name, value} = e.target;
     setFormValues((prev) => ({...prev, [name]: value}));
   };
@@ -219,7 +240,6 @@ const QuotationForm = ({setActiveTab}) => {
         city: selectedClient?.client_gst || "-",
         district: selectedClient?.client_district || "-",
       }));
-      setPrefix(selectedClient?.company_prefix);
     }
 
     // // If you're updating state
@@ -327,6 +347,7 @@ const QuotationForm = ({setActiveTab}) => {
   const handleBoxClick = (e, index) => {
     e.stopPropagation();
     setSelectedBox(index);
+    setSelectedIndex(index);
     setSelectedImage(index);
     setIsModalOpen(true);
     setFormValues({...formValues, invoice_patent: index + 1});
@@ -334,6 +355,7 @@ const QuotationForm = ({setActiveTab}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // return;
     console.log("Form submitted with values:", formValues);
     formValues.quotation_patent = selectedBox + 1;
     const data = await dispatch(createQuotation(formValues));
@@ -352,6 +374,25 @@ const QuotationForm = ({setActiveTab}) => {
     }));
   }, []);
 
+  useEffect(() => {
+    if (formValues?.company_id) {
+      const companyData = companies?.find(
+        (company) => company?.company_id == formValues?.company_id
+      );
+      setPrefix(companyData?.company_prefix);
+    }
+  }, [formValues?.company_id]);
+
+  useEffect(() => {
+    if (formValues?.company_id) {
+      const filteredClients = allClients?.filter(
+        (client) => client?.company_id == formValues?.company_id
+      );
+      console.log("allClients", allClients, filteredClients);
+      setAllClients(filteredClients);
+    }
+  }, [formValues?.company_id]);
+
   return (
     <div className='p-8 max-w-8xl mx-auto bg-white rounded-lg shadow-lg'>
       <form onSubmit={handleSubmit}>
@@ -369,6 +410,25 @@ const QuotationForm = ({setActiveTab}) => {
                 className='border border-gray-300 rounded-md p-2 w-full'
               />
             </div> */}
+            <div className='flex flex-col'>
+              <label className='mb-1 text-sm font-medium text-gray-700'>
+                Select Company
+              </label>
+              <select
+                name='company_id'
+                value={formValues?.company_id}
+                onChange={handleChange}
+                required
+                className='border border-gray-300 rounded-md px-3 py-2'
+              >
+                <option value=''>-- Select Company --</option>
+                {companies?.map((company) => (
+                  <option key={company?.company_id} value={company?.company_id}>
+                    {company?.company_name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className='flex flex-col'>
               <label className='mb-1 text-sm font-medium text-gray-700'>
                 Select Client

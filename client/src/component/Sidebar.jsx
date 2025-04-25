@@ -29,6 +29,8 @@ const Sidebar = () => {
   const [userData, setUserData] = useState({});
   const [role_id, setRoleId] = useState();
 
+  const {full_Name} = userData;
+
   useEffect(() => {
     const fetchData = async () => {
       const data = await getUserData();
@@ -179,6 +181,19 @@ const Sidebar = () => {
             Log Out
           </div>
         </div>
+      </div>
+      <div>
+        <span className='block text-center text-lg text-gray-700 pb-2'>
+          👋 Hello, {full_Name}!
+        </span>
+        <span className='block text-center text-sm text-gray-500 mt-1 border-t pt-3'>
+          {new Date().toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </span>
       </div>
     </div>
   );

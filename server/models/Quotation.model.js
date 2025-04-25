@@ -26,7 +26,6 @@ const Quotation = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-
     category: {
       type: DataTypes.STRING,
       allowNull: true,

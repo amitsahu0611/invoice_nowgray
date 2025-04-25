@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+    .animate-float-slow {
+        animation: float-slow 12s ease-in-out infinite;
+    }
+
+    @keyframes float-slow {
+
+        0%,
+        100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-10px) rotate(2deg);
+        }
+    }
+}
+
+.transition-transform {
+    transition: transform 0.3s ease;
+}
 
 
 .headerCell {

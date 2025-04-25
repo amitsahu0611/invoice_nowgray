@@ -67,7 +67,10 @@ const CreatePayment = ({setActiveTab}) => {
 
   useEffect(() => {
     if (companies?.length > 0) {
-      setAllCompanies(companies);
+      const filteredCompanies = companies.filter(
+        (company) => company?.status == "active"
+      );
+      setAllCompanies(filteredCompanies);
     }
   }, [companies]);
 
@@ -104,6 +107,10 @@ const CreatePayment = ({setActiveTab}) => {
     e.preventDefault();
     if (form?.amount - form?.totalPaid < form?.amountPaid) {
       showError("Cannot pay more than to be paid amount");
+      return;
+    }
+    if (!form?.method) {
+      showError("Please Select Method");
       return;
     }
     console.log("form", form);
@@ -255,7 +262,7 @@ const CreatePayment = ({setActiveTab}) => {
             Payment Method
           </label>
           <select
-            value={form.method} // Ensure `method` is properly passed here
+            value={form.method || "Cash"} // Ensure `method` is properly passed here
             onChange={(e) => handleChange("method", e.target.value)}
             required
             className='border border-gray-300 rounded-md px-3 py-2'

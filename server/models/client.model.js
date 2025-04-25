@@ -12,6 +12,10 @@ const Client = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
+    client_company: {
+      type: DataTypes?.STRING,
+      allownull: true,
+    },
     pan_code: {
       type: DataTypes.STRING,
       allowNull: false,

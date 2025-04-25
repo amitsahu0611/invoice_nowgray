@@ -72,7 +72,7 @@ const updateCompany = async (req, res) => {
         company_email: req.body.email,
         company_phone: req.body.phone,
         company_address: req.body.address,
-        company_prefix: req.body.prefix,
+        company_prefix: req.body.company_prefix,
         gst: req.body.gst,
         website: req.body.website,
         color: req.body.color,

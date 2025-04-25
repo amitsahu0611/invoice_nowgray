@@ -18,7 +18,7 @@ const TABLE_HEAD = [
   "Payment Status",
   "Created By",
   "Approved By",
-  "Action",
+  // "Action",
 ];
 
 const getStatusColor = (status) => {
@@ -142,13 +142,14 @@ export default function PaymentList({setActiveTab}) {
               createdAt,
               companyName,
               payment_id,
+              invoice_number,
               username,
             } = row;
             return (
               <tr key={index} className='border-b'>
                 <td className='p-4 text-sm'>{index + 1}</td>
 
-                <td className='p-4 text-sm'>{invoiceId}</td>
+                <td className='p-4 text-sm'>{invoice_number}</td>
                 <td className='p-4 text-sm'>{payment_id}</td>
                 <td className='p-4 text-sm'>{companyName}</td>
                 <td className='p-4 text-sm'>{amount}</td>
@@ -159,14 +160,14 @@ export default function PaymentList({setActiveTab}) {
                 <td className='p-4 text-sm'>{username}</td>
                 <td className='p-4 text-sm'>-</td>
 
-                <td className='p-4 text-sm'>
+                {/* <td className='p-4 text-sm'>
                   <button
                     onClick={() => handleEdit(payment_id)}
                     className='text-blue-600 hover:text-blue-800'
                   >
                     <Pencil className='h-5 w-5' />
                   </button>
-                </td>
+                </td> */}
               </tr>
             );
           })}
